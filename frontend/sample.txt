@@ -1,0 +1,50 @@
+# Run inside frontend/src/
+mkdir -p api components/common components/quiz components/layout context hooks pages utils
+```
+
+Final structure:
+```
+src/
+├── api/
+│   └── axios.js              ← Axios with auto token
+├── components/
+│   ├── common/
+│   │   ├── Button.jsx
+│   │   ├── Input.jsx
+│   │   ├── Loader.jsx
+│   │   └── Navbar.jsx
+│   ├── quiz/
+│   │   ├── QuestionCard.jsx
+│   │   ├── OptionCard.jsx
+│   │   ├── QuestionPalette.jsx
+│   │   └── Timer.jsx
+│   └── layout/
+│       ├── Layout.jsx
+│       └── ProtectedRoute.jsx
+├── context/
+│   ├── AuthContext.jsx
+│   └── ThemeContext.jsx
+├── hooks/
+│   ├── useAuth.js
+│   └── useTheme.js
+├── pages/
+│   ├── LoginPage.jsx
+│   ├── RegisterPage.jsx
+│   ├── DashboardPage.jsx
+│   ├── QuizPage.jsx
+│   └── ResultsPage.jsx
+├── utils/
+│   └── helpers.js
+├── App.jsx
+├── main.jsx
+└── index.css
+
+{navLinks.map((link) => (
+              
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}

@@ -1,0 +1,12 @@
+# backend/.gitignore
+node_modules/
+.env
+*.xlsx
+*.csv
+uploads/
+
+# frontend/.gitignore  
+node_modules/
+.env
+.env.local
+dist/

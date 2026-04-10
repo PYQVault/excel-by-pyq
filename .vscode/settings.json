@@ -1,0 +1,14 @@
+{
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    ["className\\s*=\\s*['\"`]([^'\"`]*)['\"`]"]
+  ],
+  "css.validate": false,
+  "tailwindCSS.validate": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}

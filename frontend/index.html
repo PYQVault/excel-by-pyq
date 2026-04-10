@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- Replace vite.svg with your logo -->
+    <link rel="icon" type="image/png" href="/logo.png" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO Meta tags -->
+    <title>Excel By PYQ — Practice Previous Year Questions</title>
+    <meta
+      name="description"
+      content="Practice authentic previous year questions from CUET UG, CUET PG and UGC NET. Get instant explanations, track progress, and resume anytime."
+    />
+    <meta name="keywords"
+      content="CUET preparation, UGC NET practice, previous year questions, PYQ, CUET UG, CUET PG, exam preparation India"
+    />
+    <meta name="author" content="Excel By PYQ" />
+
+    <!-- Open Graph (for sharing on WhatsApp, social media) -->
+    <meta property="og:title" content="Excel By PYQ" />
+    <meta property="og:description" content="Practice real previous year questions. Crack CUET & UGC NET." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/logo.png" />
+
+    <!-- No flash of wrong theme -->
+    <script>
+      const theme = localStorage.getItem('theme')
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark')
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+CUET UG
+ ├── Science
+ │     ├── Agricultural Science → 2022 Paper, 2023 Paper
+ │     ├── Chemistry            → 2022 Paper, 2023 Paper
+ │     ├── Botany               → 2022 Paper
+ │     └── Biochemistry         → 2022 Paper
+ ├── Arts
+ │     ├── History
+ │     └── Geography
+ └── Commerce
+       └── Accountancy
+
+CUET PG
+ ├── Science
+ │     ├── Chemistry
+ │     └── Biology
+ └── ...
+
+UGC NET
+ ├── General Paper 1  (compulsory for all)
+ ├── Computer Science
+ └── Life Sciences
+----------------------------------------------------------------------------------------
+-# Step 1: Delete the existing quiz from MongoDB
+     Open terminal connect cluster with shell
+     mongosh "mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/test"
+   1. db
+   2. use pyq_vault (database name)
+   2. show collections
+# Option A — mongosh
+db.quizzes.deleteOne({ title: "CUET UG 2022 - Agricultural Science" })
+# Get the quiz's question IDs first, then delete them too
+db.questions.deleteMany({ tags: { $all: ["CUET_UG", "Agricultural Science"] } })
+
+-----------------------------------------------------------------------------------------------
+.ENV
+
+# Email
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxx
+EMAIL_FROM=noreply@yourdomain.com
+# If you don't have a domain yet, Resend gives you a test address
+
+# Google OAuth (we'll fill these in next step)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+
+# Frontend URL (for reset password redirect)
+FRONTEND_URL=http://localhost:3000
+```
+
+**4. Get Google OAuth credentials:**
+- Go to `console.cloud.google.com`
+- Create project → Enable Google+ API
+- Create OAuth 2.0 credentials
+- Add `http://localhost:5000/api/auth/google/callback` as redirect URI
+- Copy Client ID and Secret → paste in `.env`
+
+----------------------------------------------------------------------------------------
+<div className="w-full h-10  rounded-lg flex items-center justify-center  ">
+    <Logo size="lg"  />
+</div>
+
+----------------------------------------------------------------------------
+
+ * Usage examples:
+ 
+ * Regular subject:
+node scripts/importQuiz.js --file="CUET_UG_2022_Chemistry.xlsx" --exam="CUET_UG" --stream="Main Subject" --subject="Chemistry" --year=2022 --title="CUET UG 2022 - Chemistry"
+ 
+
+ * General Aptitude (no subject):
+node scripts/importQuiz.js --file="CUET_UG_2022_General.xlsx" --exam="CUET_UG  --stream="General Aptitude" --year=2022 --title="CUET UG 2022 - General Aptitude"
+
+ ----------------------------------
+ # CUET PG — Main Subject
+node scripts/importQuiz.js \
+  --file="CUET_PG_2022_Chemistry.xlsx" \
+  --exam="CUET_PG" \
+  --stream="Main Subject" \
+  --subject="Chemistry" \
+  --year=2022 \
+  --title="CUET PG 2022 - Chemistry"
+
+# CUET PG — General Aptitude (NO --subject flag)
+node scripts/importQuiz.js \
+  --file="CUET_PG_2022_General.xlsx" \
+  --exam="CUET_PG" \
+  --stream="General Aptitude" \
+  --year=2022 \
+  --title="CUET PG 2022 - General Aptitude"
+
+# CUET UG — Science
+node scripts/importQuiz.js \
+  --file="CUET_UG_2022_Agri.xlsx" \
+  --exam="CUET_UG" \
+  --stream="Science" \
+  --subject="Agricultural Science" \
+  --year=2022 \
+  --title="CUET UG 2022 - Agricultural Science"
+  ----------------------------------------------
