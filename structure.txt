@@ -99,3 +99,16 @@ node scripts/importQuiz.js \
   --year=2022 \
   --title="CUET UG 2022 - Agricultural Science"
   ----------------------------------------------
+Importing New Question Papers After Hosting
+
+  # Change your local .env MONGO_URI to point to Atlas
+MONGO_URI=mongodb+srv://youruser:pass@cluster0.xxxxx.mongodb.net/excelbypyq
+
+# Run import script normally
+node scripts/importQuiz.js \
+  --file="NEW_PAPER.xlsx" \
+  --exam="CUET_UG" \
+  --stream="Science" \
+  --subject="Chemistry" \
+  --year=2023 \
+  --title="CUET UG 2023 - Chemistry"

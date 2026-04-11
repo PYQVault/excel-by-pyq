@@ -11,18 +11,22 @@ require('./models/QuizAttempt')
 
 const express  = require('express')
 const cors     = require('cors')
-const passport = require('./config/passport')   // ← add this
+const passport = require('./config/passport')   
 const { notFound, errorHandler } = require('./middleware/errorMiddleware')
 
 const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(passport.initialize())                  // ← add this
+app.use(passport.initialize())                 
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? 'https://your-deployed-frontend.com'
+    ? [
+        'https://excelbypyq.com',
+        'https://www.excelbypyq.com',
+        'https://excelbypyq.vercel.app',   // ← keep as backup
+      ]
     : 'http://localhost:3000',
   credentials: true,
 }))
