@@ -25,7 +25,7 @@ app.use(cors({
     ? [
         'https://excelbypyq.com',
         'https://www.excelbypyq.com',
-        'https://excelbypyq.vercel.app',   // ← keep as backup
+        'https://excelbypyq.vercel.app',
       ]
     : 'http://localhost:3000',
   credentials: true,
