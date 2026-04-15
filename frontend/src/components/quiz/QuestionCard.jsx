@@ -3,38 +3,16 @@ import OptionCard from './OptionCard'
 import QuestionText from './QuestionText'
 import clsx from 'clsx'
 
-// ── Image with fallback ───────────────────────────────────────────────────
 const QuestionImage = ({ url, alt = 'Question image' }) => {
   if (!url) return null
-
   return (
     <div className="mb-5 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
       <img
         src={url}
         alt={alt}
         className="w-full max-h-72 object-contain p-2"
-        onError={(e) => {
-          // Show fallback if image fails to load
-          e.target.style.display = 'none'
-          e.target.nextSibling.style.display = 'flex'
-        }}
+        onError={(e) => { e.currentTarget.style.display = 'none' }}
       />
-      {/* Fallback — hidden by default */}
-      <div
-        className="hidden flex-col items-center justify-center py-8 text-slate-400 gap-2"
-        style={{ display: 'none' }}
-      >
-        <ImageOff size={28} />
-        <p className="text-sm">Image could not be loaded</p>
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-blue-500 hover:underline break-all px-4 text-center"
-        >
-          Open image in new tab
-        </a>
-      </div>
     </div>
   )
 }
@@ -47,7 +25,10 @@ const QuestionCard = ({
   correctIndex,
   isRevealed,
   onAnswer,
+  currentAnswer,
 }) => {
+  const isPending = currentAnswer?.pending === true
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
 
@@ -56,7 +37,8 @@ const QuestionCard = ({
         <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">
           Question {questionNumber} of {totalQuestions}
         </span>
-        {isRevealed && (
+
+        {isRevealed && !isPending && (
           <span className={clsx(
             'flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full',
             selectedIndex === correctIndex
@@ -69,25 +51,32 @@ const QuestionCard = ({
             }
           </span>
         )}
+
+        {isPending && (
+          <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500">
+            <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+            </svg>
+            Saving...
+          </span>
+        )}
       </div>
 
       {/* Question body */}
       <div className="px-6 py-6">
 
-        {/* Question image — renders if questionImageUrl exists */}
         <QuestionImage
           url={question.questionImageUrl}
           alt={`Question ${questionNumber}`}
         />
 
-        {/* Question text — renders if questionText exists */}
         {question.questionText && (
           <div className="mb-6">
             <QuestionText text={question.questionText} />
           </div>
         )}
 
-        {/* If neither text nor image — show placeholder */}
         {!question.questionText && !question.questionImageUrl && (
           <p className="text-slate-400 italic text-sm mb-6">
             No question text provided.
@@ -96,24 +85,25 @@ const QuestionCard = ({
 
         {/* Options */}
         <div className="flex flex-col gap-3">
-          {question.options.map((option, index) => (
+          {question.options?.map((option, index) => (
             <OptionCard
               key={index}
               option={option}
               index={index}
               isSelected={selectedIndex === index}
-              isCorrect={isRevealed && index === correctIndex}
-              isWrong={isRevealed && selectedIndex === index && index !== correctIndex}
-              isRevealed={isRevealed}
+              isCorrect={isRevealed && !isPending && index === correctIndex}
+              isWrong={isRevealed && !isPending && selectedIndex === index && index !== correctIndex}
+              isRevealed={isRevealed && !isPending}
+              isPending={isPending && selectedIndex === index}
               onClick={onAnswer}
-              disabled={isRevealed}
+              disabled={isRevealed || isPending}
             />
           ))}
         </div>
       </div>
 
       {/* Explanation */}
-      {isRevealed && (
+      {isRevealed && !isPending && (
         <div className="mx-5 mb-6">
           <div className={clsx(
             'rounded-2xl border-2 overflow-hidden',
@@ -128,7 +118,7 @@ const QuestionCard = ({
                 : 'bg-amber-50 dark:bg-amber-900/30'
             )}>
               <div className={clsx(
-                'w-8 h-8 rounded-xl flex items-center justify-center shrink-0',
+                'w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0',
                 selectedIndex === correctIndex
                   ? 'bg-green-100 dark:bg-green-800/50'
                   : 'bg-amber-100 dark:bg-amber-800/50'

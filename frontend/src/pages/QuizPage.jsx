@@ -172,39 +172,51 @@ const QuizPage = () => {
   }, [currentIndex]);
 
   // ── Handle answer selection ───────────────────────────────────────────
-  const handleAnswer = useCallback(
-    async (selectedOptionIndex) => {
-      if (!quiz || !attempt) return;
+const handleAnswer = useCallback(async (selectedOptionIndex) => {
+  if (!quiz || !attempt) return
+  const question = quiz.questions[currentIndex]
+  const qId      = question._id
+  if (answers[qId] !== undefined) return
 
-      const question = quiz.questions[currentIndex];
-      const qId = question._id;
-
-      // Already answered — don't re-submit
-      if (answers[qId] !== undefined) return;
-
-      try {
-        // Save to backend — backend returns isCorrect + correctOptionIndex
-        const { data } = await api.patch(`/attempts/${attempt._id}/answer`, {
-          questionId: qId,
-          selectedOptionIndex,
-          currentQuestionIndex: currentIndex,
-        });
-
-        // Update local answers state
-        setAnswers((prev) => ({
-          ...prev,
-          [qId]: {
-            selectedOptionIndex,
-            isCorrect: data.data.isCorrect,
-            correctOptionIndex: data.data.correctOptionIndex,
-          },
-        }));
-      } catch {
-        toast.error("Failed to save answer. Check connection.");
-      }
+  setAnswers((prev) => ({
+    ...prev,
+    [qId]: {
+      selectedOptionIndex,
+      isCorrect:          null,
+      correctOptionIndex: null,
+      pending:            true,
     },
-    [quiz, attempt, currentIndex, answers],
-  );
+  }))
+
+  try {
+    const { data } = await api.patch(`/attempts/${attempt._id}/answer`, {
+      questionId:           qId,
+      selectedOptionIndex,
+      currentQuestionIndex: currentIndex,
+    })
+
+    setAnswers((prev) => ({
+      ...prev,
+      [qId]: {
+        selectedOptionIndex,
+        isCorrect:          data.data.isCorrect,
+        correctOptionIndex: data.data.correctOptionIndex,
+        pending:            false,
+      },
+    }))
+
+    // ── REMOVED auto-advance ──────────────────────────────────────────
+    // User reads explanation first, then clicks Next manually
+
+  } catch {
+    setAnswers((prev) => {
+      const copy = { ...prev }
+      delete copy[qId]
+      return copy
+    })
+    toast.error('Connection issue. Please try again.')
+  }
+}, [quiz, attempt, currentIndex, answers])
 
   // ── Navigation ────────────────────────────────────────────────────────
   const goTo = (index) => {
@@ -360,6 +372,7 @@ const QuizPage = () => {
                 correctIndex={currentAnswer?.correctOptionIndex ?? null}
                 isRevealed={isRevealed}
                 onAnswer={handleAnswer}
+                currentAnswer={currentAnswer}
               />
             )}
 
