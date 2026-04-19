@@ -880,15 +880,11 @@ const DashboardPage = () => {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    {
-                      label: "CUET UG · Science · Agriculture",
-                      q: "Agricultural",
-                    },
-                    { label: "CUET UG · Science · Chemistry", q: "Chemistry" },
-                    { label: "CUET UG · Science · Botany", q: "Botany" },
-                    { label: "UGC NET · General", q: "NET" },
+                    { label: "CUET UG ", q: "CUET" },
                     { label: "2022 Papers", q: "2022" },
                     { label: "2023 Papers", q: "2023" },
+                    { label: "2024 Papers", q: "2024" },
+                    { label: "2025 Papers", q: "2025" },
                   ].map((tag) => (
                     <button
                       key={tag.label}

@@ -19,7 +19,7 @@ import QuestionPalette from "@/components/quiz/QuestionPalette";
 
 // ── Resume Modal ───────────────────────────────────────────────────────────
 const ResumeModal = ({ attempt, onContinue, onRestart, onClose }) => {
-  const answeredCount = Object.keys(attempt.answers || {}).length
+  const answeredCount = Object.keys(attempt.answers || {}).length;
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center px-4">
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-md overflow-hidden">
@@ -31,7 +31,6 @@ const ResumeModal = ({ attempt, onContinue, onRestart, onClose }) => {
             <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 rounded-2xl flex items-center justify-center">
               <Clock size={22} className="text-amber-500" />
             </div>
-            {/* X close button */}
             <button
               onClick={onClose}
               className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
@@ -47,10 +46,12 @@ const ResumeModal = ({ attempt, onContinue, onRestart, onClose }) => {
             You have an unfinished attempt for this quiz.
           </p>
           <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-6">
-            You have answered{' '}
-            <span className="text-blue-500 font-bold">{answeredCount}</span>{' '}
-            out of{' '}
-            <span className="text-blue-500 font-bold">{attempt.totalQuestions}</span>{' '}
+            You have answered{" "}
+            <span className="text-blue-500 font-bold">{answeredCount}</span>{" "}
+            out of{" "}
+            <span className="text-blue-500 font-bold">
+              {attempt.totalQuestions}
+            </span>{" "}
             questions.
           </p>
           <div className="flex gap-3">
@@ -64,8 +65,8 @@ const ResumeModal = ({ attempt, onContinue, onRestart, onClose }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 // ── Submit Confirm Modal ───────────────────────────────────────────────────
 const SubmitModal = ({ unanswered, onConfirm, onCancel, loading }) => (
@@ -82,7 +83,9 @@ const SubmitModal = ({ unanswered, onConfirm, onCancel, loading }) => (
         {unanswered > 0 ? (
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
             You have{" "}
-            <span className="text-amber-500 font-bold">{unanswered} unattempted</span>{" "}
+            <span className="text-amber-500 font-bold">
+              {unanswered} unattempted
+            </span>{" "}
             question{unanswered !== 1 ? "s" : ""}. They will be marked as
             unattempted.
           </p>
@@ -136,23 +139,22 @@ const QuizPage = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        // 1. Fetch quiz questions
         const { data: quizData } = await api.get(`/quizzes/${quizId}`);
         setQuiz(quizData.data);
 
-        // 2. Start or resume attempt
         const { data: attemptData } = await api.post("/attempts/start", {
           quizId,
         });
 
+        // ── If attempt is already completed → go to results ──────────
+        if (attemptData.data.status === "completed") {
+          navigate(`/results/${attemptData.data._id}`, { replace: true });
+          return;
+        }
+
         setAttempt(attemptData.data);
 
-        // Only show resume modal if there are actual saved answers
-        if (
-          attemptData.isResuming &&
-          Object.keys(attemptData.data.answers || {}).length > 0
-        ) {
-          // Restore previous answers from DB
+        if (attemptData.isResuming) {
           const restored = {};
           const rawAnswers = attemptData.data.answers || {};
           Object.entries(rawAnswers).forEach(([qId, ans]) => {
@@ -256,8 +258,12 @@ const QuizPage = () => {
     try {
       const { data } = await api.post(`/attempts/${attempt._id}/submit`);
       toast.success("Submitted! 🎉");
+
+      // replace: true removes quiz page from history
+      // back button will go to dashboard, not back to quiz
       navigate(`/results/${attempt._id}`, {
         state: { results: data.data },
+        replace: true,
       });
     } catch {
       toast.error("Submission failed. Try again.");
@@ -284,16 +290,16 @@ const QuizPage = () => {
 
       {/* Modals */}
       {showResume && (
-  <ResumeModal
-    attempt={attempt}
-    onContinue={handleContinue}
-    onRestart={handleRestart}
-    onClose={() => {
-      setShowResume(false)
-      navigate('/dashboard')  // Go back to dashboard if dismissed
-    }}
-  />
-)}
+        <ResumeModal
+          attempt={attempt}
+          onContinue={handleContinue}
+          onRestart={handleRestart}
+          onClose={() => {
+            setShowResume(false);
+            navigate("/dashboard");
+          }}
+        />
+      )}
       {showSubmit && (
         <SubmitModal
           unanswered={unansweredCount}
@@ -366,7 +372,6 @@ const QuizPage = () => {
               variant="primary"
               size="sm"
               onClick={() => {
-                // If no questions answered yet — submit directly without modal
                 if (Object.keys(answers).length === 0) {
                   handleSubmit();
                   return;

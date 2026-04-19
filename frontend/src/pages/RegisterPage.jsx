@@ -169,9 +169,7 @@ const RegisterPage = () => {
               <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">
                 Create your account ✨
               </h2>
-              <p className="text-slate-500 dark:text-slate-400">
-                Free forever. No credit card required.
-              </p>
+              
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

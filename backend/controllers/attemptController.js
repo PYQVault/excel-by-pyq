@@ -7,65 +7,81 @@ const Quiz = require('../models/Quiz');
 // Otherwise creates a fresh attempt
 const startOrResumeAttempt = async (req, res, next) => {
   try {
-    const { quizId } = req.body;
-    const userId = req.user._id;
+    const { quizId } = req.body
+    const userId     = req.user._id
 
     if (!quizId) {
-      res.status(400);
-      return next(new Error('quizId is required'));
+      res.status(400)
+      return next(new Error('quizId is required'))
     }
 
-    // Verify quiz exists
-    const quiz = await Quiz.findById(quizId);
+    const quiz = await Quiz.findById(quizId)
     if (!quiz || !quiz.isPublished) {
-      res.status(404);
-      return next(new Error('Quiz not found'));
+      res.status(404)
+      return next(new Error('Quiz not found'))
     }
 
-    // Look for an existing in-progress attempt
-    const existingAttempt = await QuizAttempt.findOne({
+    // ── Check for in_progress attempt first ───────────────────────
+    const inProgressAttempt = await QuizAttempt.findOne({
       userId,
       quizId,
       status: 'in_progress',
-    });
+    })
 
-    if (existingAttempt) {
-      // ── RESUME: return existing attempt ──────────────────────────────
-      // Convert Map to plain object for JSON serialization
-      const answersObj = Object.fromEntries(existingAttempt.answers);
-
+    if (inProgressAttempt) {
+      const answersObj = Object.fromEntries(inProgressAttempt.answers)
       return res.status(200).json({
-        success: true,
-        isResuming: true,
+        success:     true,
+        isResuming:  true,
         data: {
-          ...existingAttempt.toObject(),
+          ...inProgressAttempt.toObject(),
           answers: answersObj,
         },
-      });
+      })
     }
 
-    // ── FRESH START: create new attempt ──────────────────────────────
+    // ── Check for completed attempt ───────────────────────────────
+    // If user navigates back to quiz after completing it
+    const completedAttempt = await QuizAttempt.findOne({
+      userId,
+      quizId,
+      status: 'completed',
+    }).sort({ completedAt: -1 })  // Most recent completed
+
+    if (completedAttempt) {
+      // Return completed attempt — frontend will redirect to results
+      return res.status(200).json({
+        success:     true,
+        isResuming:  false,
+        data: {
+          ...completedAttempt.toObject(),
+          answers: Object.fromEntries(completedAttempt.answers),
+        },
+      })
+    }
+
+    // ── Fresh start ───────────────────────────────────────────────
     const attempt = await QuizAttempt.create({
       userId,
       quizId,
-      totalQuestions: quiz.questions.length,
+      totalQuestions:       quiz.questions.length,
       currentQuestionIndex: 0,
-      answers: {},
-      status: 'in_progress',
-    });
+      answers:              {},
+      status:               'in_progress',
+    })
 
     res.status(201).json({
-      success: true,
+      success:    true,
       isResuming: false,
       data: {
         ...attempt.toObject(),
         answers: {},
       },
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 // ── @route  PATCH /api/attempts/:id/answer ────────────────────────────────
 // ── @access Private
@@ -291,13 +307,39 @@ const getAttemptResults = async (req, res, next) => {
       return next(new Error('Completed attempt not found'))
     }
 
+    const CORRECT_MARKS = 5
+    const WRONG_MARKS   = -1
+
     const quiz = await Quiz.findById(attempt.quizId).populate({
       path:   'questions',
-      select: 'questionText questionImageUrl options correctOptionIndex explanation',
+      select: 'questionText questionImageUrl options correctOptionIndex explanation isGrace',
     })
 
+    let correctCount    = 0
+    let wrongCount      = 0
+    let graceCount      = 0
+    let unattemptedCount = 0
+
     const results = quiz.questions.map((question, index) => {
-      const answer = attempt.answers.get(question._id.toString())
+      const answer  = attempt.answers.get(question._id.toString())
+      const isGrace = question.isGrace || false
+
+      let isCorrect    = false
+      let marksAwarded = 0
+
+      if (isGrace) {
+        isCorrect    = true
+        marksAwarded = CORRECT_MARKS
+        graceCount++
+      } else if (answer) {
+        isCorrect    = answer.isCorrect
+        marksAwarded = isCorrect ? CORRECT_MARKS : WRONG_MARKS
+        if (isCorrect) correctCount++
+        else wrongCount++
+      } else {
+        unattemptedCount++
+      }
+
       return {
         questionNumber:      index + 1,
         questionText:        question.questionText,
@@ -306,19 +348,36 @@ const getAttemptResults = async (req, res, next) => {
         correctOptionIndex:  question.correctOptionIndex,
         explanation:         question.explanation,
         selectedOptionIndex: answer ? answer.selectedOptionIndex : null,
-        isCorrect:           answer ? answer.isCorrect : false,
+        isCorrect,
         isAttempted:         !!answer,
+        isGrace,
+        marksAwarded,
       }
     })
+
+    const totalMarks   = attempt.score
+    const maxMarks     = attempt.totalQuestions * CORRECT_MARKS
+    const scorePercent = Math.max(0, Math.round((totalMarks / maxMarks) * 100))
+    const timeTaken    = Math.round((attempt.completedAt - attempt.startedAt) / 1000)
 
     res.status(200).json({
       success: true,
       data: {
-        attemptId:       attempt._id,
-        score:           attempt.score,
-        totalQuestions:  attempt.totalQuestions,
-        scorePercentage: Math.round((attempt.score / attempt.totalQuestions) * 100),
-        timeTaken:       Math.round((attempt.completedAt - attempt.startedAt) / 1000),
+        attemptId:        attempt._id,
+        // ── Same field names as submitAttempt ──
+        totalMarks,
+        maxMarks,
+        correctCount,
+        wrongCount,
+        graceCount,
+        unattemptedCount,
+        scorePercentage:  scorePercent,
+        timeTaken,
+        markingScheme: {
+          correct:     CORRECT_MARKS,
+          wrong:       WRONG_MARKS,
+          unattempted: 0,
+        },
         results,
       },
     })

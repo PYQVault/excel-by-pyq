@@ -13,6 +13,23 @@ import Button from '@/components/common/Button'
 import QuestionText from '@/components/quiz/QuestionText'
 import clsx from 'clsx'
 
+// ── Normalize results from both sources to the same shape ─────────────────
+const normalizeResults = (data) => {
+  return {
+    attemptId:        data.attemptId,
+    totalMarks:       data.totalMarks       ?? data.score              ?? 0,
+    maxMarks:         data.maxMarks         ?? (data.totalQuestions * 5) ?? 0,
+    correctCount:     data.correctCount     ?? data.score              ?? 0,
+    wrongCount:       data.wrongCount       ?? 0,
+    graceCount:       data.graceCount       ?? 0,
+    unattemptedCount: data.unattemptedCount ?? 0,
+    scorePercentage:  data.scorePercentage  ?? 0,
+    timeTaken:        data.timeTaken        ?? 0,
+    markingScheme:    data.markingScheme    ?? { correct: 5, wrong: -1, unattempted: 0 },
+    results:          data.results          ?? [],
+  }
+}
+
 // ── Score Ring ─────────────────────────────────────────────────────────────
 const ScoreRing = ({ percentage }) => {
   const radius        = 54
@@ -264,14 +281,14 @@ const ResultsPage = () => {
     const load = async () => {
       // Use state passed from QuizPage if available (no extra API call)
       if (location.state?.results) {
-        setResults(location.state.results)
+        setResults(normalizeResults(location.state.results))
         setLoading(false)
         return
       }
       // Otherwise fetch from backend
       try {
         const { data } = await api.get(`/attempts/${attemptId}/results`)
-        setResults(data.data)
+        setResults(normalizeResults(data.data))
       } catch {
         toast.error('Could not load results')
         navigate('/dashboard')
@@ -291,21 +308,25 @@ const ResultsPage = () => {
   if (loading) return <Loader text="Loading your results..." />
   if (!results) return null
 
-  // ── Destructure new scoring fields from API ──────────────────────────
+  // ── Destructure normalized fields ────────────────────────────────────
   const {
     totalMarks,
     maxMarks,
     correctCount,
     wrongCount,
+    graceCount,
     unattemptedCount,
     scorePercentage,
     timeTaken,
     markingScheme,
   } = results
 
-  const perf   = getPerformance(scorePercentage)
-  const mins   = Math.floor((timeTaken || 0) / 60)
-  const secs   = ((timeTaken || 0) % 60).toString().padStart(2, '0')
+  const score       = correctCount     // backward compat
+  const unattempted = unattemptedCount // backward compat
+
+  const perf    = getPerformance(scorePercentage)
+  const mins    = Math.floor((timeTaken || 0) / 60)
+  const secs    = ((timeTaken || 0) % 60).toString().padStart(2, '0')
   const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`
 
   // Filtered questions
