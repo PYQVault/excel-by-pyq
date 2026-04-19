@@ -14,9 +14,9 @@ const getQuizMeta = async (req, res, next) => {
       if (!tree[exam])         tree[exam] = {}
       if (!tree[exam][stream]) tree[exam][stream] = {}
 
-      // ── Key fix: use '__none__' for streams with no subject ──
+      // ── Key fix: use 'General Aptitude' for streams with no subject ──
       // General Aptitude papers have no subject — group under special key
-      const subjectKey = subject?.trim() || '__none__'
+      const subjectKey = subject?.trim() || 'General Aptitude'
 
       if (!tree[exam][stream][subjectKey]) {
         tree[exam][stream][subjectKey] = []
@@ -33,58 +33,51 @@ const getQuizMeta = async (req, res, next) => {
 // ── GET /api/quizzes ──────────────────────────────────────────────────────
 const getAllQuizzes = async (req, res, next) => {
   try {
-    const filter = { isPublished: true }
+    const page  = parseInt(req.query.page)  || 1
+    const limit = parseInt(req.query.limit) || 20
+    const skip  = (page - 1) * limit
 
+    const filter = { isPublished: true }
     if (req.query.exam)    filter.exam    = req.query.exam
     if (req.query.stream)  filter.stream  = req.query.stream
     if (req.query.subject) filter.subject = req.query.subject
 
-    // ── Smart search ─────────────────────────────────────────────────────
     if (req.query.search) {
-      const raw = req.query.search.trim()
-
-      // Split search into individual words — match ALL of them
-      // "cuet chem" → must contain "cuet" AND "chem"
-      const words = raw.split(/\s+/).filter(Boolean)
-
-      if (words.length === 1) {
-        // Single word — simple regex
-        const regex = new RegExp(raw, 'i')
-        filter.$or = [
-          { title:   regex },
-          { subject: regex },
-          { stream:  regex },
-          { exam:    regex },
-          { description: regex },
-        ]
-      } else {
-        // Multiple words — each word must match somewhere in the document
-        filter.$and = words.map((word) => {
-          const regex = new RegExp(word, 'i')
-          return {
-            $or: [
-              { title:       regex },
-              { subject:     regex },
-              { stream:      regex },
-              { exam:        regex },
-              { description: regex },
-            ],
-          }
-        })
-      }
+      const words = req.query.search.trim().split(/\s+/).filter(Boolean)
+      filter.$and = words.map((word) => {
+        const regex = new RegExp(word, 'i')
+        return {
+          $or: [
+            { title: regex }, { subject: regex },
+            { stream: regex }, { exam: regex },
+          ],
+        }
+      })
     }
 
-    const quizzes = await Quiz.find(filter)
-      .select('title description exam stream subject year timeLimitMinutes questions createdAt')
-      .sort({ year: -1 })
-      .lean()
+    const [quizzes, total] = await Promise.all([
+      Quiz.find(filter)
+        .select('title description exam stream subject year timeLimitMinutes questions createdAt')
+        .sort({ year: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Quiz.countDocuments(filter),
+    ])
 
     const data = quizzes.map((q) => ({
       ...q,
       questionCount: q.questions.length,
     }))
 
-    res.status(200).json({ success: true, count: data.length, data })
+    res.status(200).json({
+      success: true,
+      count: data.length,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      data,
+    })
   } catch (error) {
     next(error)
   }

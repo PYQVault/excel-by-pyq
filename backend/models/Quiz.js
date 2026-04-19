@@ -12,33 +12,27 @@ const QuizSchema = new mongoose.Schema({
     required: true,
     enum: ['CUET_UG', 'CUET_PG', 'UGC_NET'],
   },
-  stream: {
+  stream:  { type: String, required: true, trim: true },
+  subject: { type: String, trim: true, default: '' },
+  year:    { type: Number, required: true },
+
+  // ── NEW: For multiple papers in same year ─────────────────────────
+  // Examples: 'A', 'B', 'Morning', 'Evening', 'Shift 1', 'Shift 2'
+  // Empty string means only one paper that year
+  variant: {
     type: String,
-    required: true,
     trim: true,
+    default: '',
   },
-  subject: {
-    type: String,
-    trim: true,
-    default: '',        // ← empty for General Aptitude
-  },
-  year: {
-    type: Number,
-    required: true,
-  },
-  questions: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Question',
-  }],
+
+  questions:        [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
   timeLimitMinutes: { type: Number, default: 0 },
   isPublished:      { type: Boolean, default: true },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
+  createdBy:        { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true })
 
-QuizSchema.index({ exam: 1, stream: 1, subject: 1 })
-QuizSchema.index({ exam: 1, year: 1 })
+QuizSchema.index({ exam: 1, stream: 1, subject: 1, isPublished: 1 })
+QuizSchema.index({ exam: 1, year: 1, variant: 1 })
+QuizSchema.index({ title: 'text', subject: 'text' })
 
 module.exports = mongoose.model('Quiz', QuizSchema)

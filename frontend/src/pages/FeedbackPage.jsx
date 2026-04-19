@@ -22,27 +22,6 @@ const TYPES = [
     color: 'text-blue-500',
     bg:    'bg-blue-50 dark:bg-blue-900/30',
     border:'border-blue-200 dark:border-blue-700',
-    active:'bg-blue-500',
-  },
-  {
-    key:   'bug',
-    label: 'Report a Bug',
-    icon:  Bug,
-    desc:  'Something not working correctly?',
-    color: 'text-red-500',
-    bg:    'bg-red-50 dark:bg-red-900/30',
-    border:'border-red-200 dark:border-red-700',
-    active:'bg-red-500',
-  },
-  {
-    key:   'suggestion',
-    label: 'Suggestion',
-    icon:  Lightbulb,
-    desc:  'Got an idea to improve the app?',
-    color: 'text-amber-500',
-    bg:    'bg-amber-50 dark:bg-amber-900/30',
-    border:'border-amber-200 dark:border-amber-700',
-    active:'bg-amber-500',
   },
   {
     key:   'other',
@@ -52,7 +31,6 @@ const TYPES = [
     color: 'text-slate-500',
     bg:    'bg-slate-50 dark:bg-slate-800',
     border:'border-slate-200 dark:border-slate-600',
-    active:'bg-slate-500',
   },
 ]
 
@@ -272,18 +250,17 @@ const FeedbackPage = () => {
             <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">
               What is this about?
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {TYPES.map((type) => (
-                <TypeCard
-                  key={type.key}
-                  type={type}
-                  selected={formData.type === type.key}
-                  onSelect={(key) =>
-                    setFormData((p) => ({ ...p, type: key }))
-                  }
-                />
-              ))}
-            </div>
+            {/* Type selector grid — 2 cols → 1 col since only 2 items */}
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+  {TYPES.map((type) => (
+    <TypeCard
+      key={type.key}
+      type={type}
+      selected={formData.type === type.key}
+      onSelect={(key) => setFormData((p) => ({ ...p, type: key }))}
+    />
+  ))}
+</div>
           </div>
 
           {/* Subject + Message */}

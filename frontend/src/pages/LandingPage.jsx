@@ -229,7 +229,7 @@ const ExamBadge = ({ icon, label, desc, color, subjects, available }) => {
 
       {/* Coming Soon overlay — only for unavailable cards */}
       {!available && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-[3px]">
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-[1px]">
           <span className="text-3xl">🚧</span>
           <span className="mt-2 text-sm font-bold text-slate-600 dark:text-slate-300 tracking-wide">
             Coming Soon
@@ -601,7 +601,7 @@ const exams = [
               </span>
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                 <CheckCircle2 size={14} className="text-green-500" />
-                Free to use · No credit card needed
+                Free to use
               </div>
             </div>
           </div>

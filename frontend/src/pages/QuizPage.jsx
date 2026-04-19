@@ -18,16 +18,28 @@ import QuestionCard from "@/components/quiz/QuestionCard";
 import QuestionPalette from "@/components/quiz/QuestionPalette";
 
 // ── Resume Modal ───────────────────────────────────────────────────────────
-const ResumeModal = ({ attempt, onContinue, onRestart }) => {
-  const answeredCount = Object.keys(attempt.answers || {}).length;
+const ResumeModal = ({ attempt, onContinue, onRestart, onClose }) => {
+  const answeredCount = Object.keys(attempt.answers || {}).length
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center px-4">
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-md overflow-hidden">
-        <div className="h-1.5 w-full bg-linear-to-r from-amber-400 to-orange-500" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 to-orange-500" />
         <div className="p-6">
-          <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 rounded-2xl flex items-center justify-center mb-4">
-            <Clock size={22} className="text-amber-500" />
+
+          {/* Header with X button */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 rounded-2xl flex items-center justify-center">
+              <Clock size={22} className="text-amber-500" />
+            </div>
+            {/* X close button */}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+            >
+              <X size={16} />
+            </button>
           </div>
+
           <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
             Resume Quiz?
           </h2>
@@ -35,17 +47,15 @@ const ResumeModal = ({ attempt, onContinue, onRestart }) => {
             You have an unfinished attempt for this quiz.
           </p>
           <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-6">
-            You've answered{" "}
-            <span className="text-blue-500 font-bold">{answeredCount}</span> out
-            of{" "}
-            <span className="text-blue-500 font-bold">
-              {attempt.totalQuestions}
-            </span>{" "}
+            You have answered{' '}
+            <span className="text-blue-500 font-bold">{answeredCount}</span>{' '}
+            out of{' '}
+            <span className="text-blue-500 font-bold">{attempt.totalQuestions}</span>{' '}
             questions.
           </p>
           <div className="flex gap-3">
             <Button variant="primary" className="flex-1" onClick={onContinue}>
-              Continue
+              Resume
             </Button>
             <Button variant="ghost" className="flex-1" onClick={onRestart}>
               Start Fresh
@@ -54,8 +64,8 @@ const ResumeModal = ({ attempt, onContinue, onRestart }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // ── Submit Confirm Modal ───────────────────────────────────────────────────
 const SubmitModal = ({ unanswered, onConfirm, onCancel, loading }) => (
@@ -67,20 +77,18 @@ const SubmitModal = ({ unanswered, onConfirm, onCancel, loading }) => (
           <AlertTriangle size={22} className="text-blue-500" />
         </div>
         <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-          Submit Quiz?
+          Submit?
         </h2>
         {unanswered > 0 ? (
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
             You have{" "}
-            <span className="text-red-500 font-bold">
-              {unanswered} unanswered
-            </span>{" "}
-            question{unanswered !== 1 ? "s" : ""}. Unanswered questions will be
-            marked incorrect.
+            <span className="text-amber-500 font-bold">{unanswered} unattempted</span>{" "}
+            question{unanswered !== 1 ? "s" : ""}. They will be marked as
+            unattempted.
           </p>
         ) : (
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-            You've answered all questions. Ready to see your results?
+            You have answered all questions. Ready to see your results?
           </p>
         )}
         <div className="flex gap-3">
@@ -90,7 +98,7 @@ const SubmitModal = ({ unanswered, onConfirm, onCancel, loading }) => (
             onClick={onConfirm}
             loading={loading}
           >
-            Yes, Submit
+            Submit
           </Button>
           <Button variant="ghost" className="flex-1" onClick={onCancel}>
             Review First
@@ -121,7 +129,6 @@ const QuizPage = () => {
   const [showPalette, setShowPalette] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [pendingRestart, setPendingRestart] = useState(false);
 
   const topRef = useRef(null);
 
@@ -140,7 +147,11 @@ const QuizPage = () => {
 
         setAttempt(attemptData.data);
 
-        if (attemptData.isResuming) {
+        // Only show resume modal if there are actual saved answers
+        if (
+          attemptData.isResuming &&
+          Object.keys(attemptData.data.answers || {}).length > 0
+        ) {
           // Restore previous answers from DB
           const restored = {};
           const rawAnswers = attemptData.data.answers || {};
@@ -148,7 +159,6 @@ const QuizPage = () => {
             restored[qId] = {
               selectedOptionIndex: ans.selectedOptionIndex,
               isCorrect: ans.isCorrect,
-              // We'll fetch correctOptionIndex per question when revealed
               correctOptionIndex: null,
             };
           });
@@ -172,51 +182,50 @@ const QuizPage = () => {
   }, [currentIndex]);
 
   // ── Handle answer selection ───────────────────────────────────────────
-const handleAnswer = useCallback(async (selectedOptionIndex) => {
-  if (!quiz || !attempt) return
-  const question = quiz.questions[currentIndex]
-  const qId      = question._id
-  if (answers[qId] !== undefined) return
+  const handleAnswer = useCallback(
+    async (selectedOptionIndex) => {
+      if (!quiz || !attempt) return;
+      const question = quiz.questions[currentIndex];
+      const qId = question._id;
+      if (answers[qId] !== undefined) return;
 
-  setAnswers((prev) => ({
-    ...prev,
-    [qId]: {
-      selectedOptionIndex,
-      isCorrect:          null,
-      correctOptionIndex: null,
-      pending:            true,
+      setAnswers((prev) => ({
+        ...prev,
+        [qId]: {
+          selectedOptionIndex,
+          isCorrect: null,
+          correctOptionIndex: null,
+          pending: true,
+        },
+      }));
+
+      try {
+        const { data } = await api.patch(`/attempts/${attempt._id}/answer`, {
+          questionId: qId,
+          selectedOptionIndex,
+          currentQuestionIndex: currentIndex,
+        });
+
+        setAnswers((prev) => ({
+          ...prev,
+          [qId]: {
+            selectedOptionIndex,
+            isCorrect: data.data.isCorrect,
+            correctOptionIndex: data.data.correctOptionIndex,
+            pending: false,
+          },
+        }));
+      } catch {
+        setAnswers((prev) => {
+          const copy = { ...prev };
+          delete copy[qId];
+          return copy;
+        });
+        toast.error("Connection issue. Please try again.");
+      }
     },
-  }))
-
-  try {
-    const { data } = await api.patch(`/attempts/${attempt._id}/answer`, {
-      questionId:           qId,
-      selectedOptionIndex,
-      currentQuestionIndex: currentIndex,
-    })
-
-    setAnswers((prev) => ({
-      ...prev,
-      [qId]: {
-        selectedOptionIndex,
-        isCorrect:          data.data.isCorrect,
-        correctOptionIndex: data.data.correctOptionIndex,
-        pending:            false,
-      },
-    }))
-
-    // ── REMOVED auto-advance ──────────────────────────────────────────
-    // User reads explanation first, then clicks Next manually
-
-  } catch {
-    setAnswers((prev) => {
-      const copy = { ...prev }
-      delete copy[qId]
-      return copy
-    })
-    toast.error('Connection issue. Please try again.')
-  }
-}, [quiz, attempt, currentIndex, answers])
+    [quiz, attempt, currentIndex, answers],
+  );
 
   // ── Navigation ────────────────────────────────────────────────────────
   const goTo = (index) => {
@@ -246,7 +255,7 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
     setSubmitting(true);
     try {
       const { data } = await api.post(`/attempts/${attempt._id}/submit`);
-      toast.success("Quiz submitted! 🎉");
+      toast.success("Submitted! 🎉");
       navigate(`/results/${attempt._id}`, {
         state: { results: data.data },
       });
@@ -266,7 +275,7 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
     ? quiz.questions.length - Object.keys(answers).length
     : 0;
 
-  if (loading) return <Loader text="Loading quiz..." />;
+  if (loading) return <Loader text="Loading ..." />;
   if (!quiz) return null;
 
   return (
@@ -275,12 +284,16 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
 
       {/* Modals */}
       {showResume && (
-        <ResumeModal
-          attempt={attempt}
-          onContinue={handleContinue}
-          onRestart={handleRestart}
-        />
-      )}
+  <ResumeModal
+    attempt={attempt}
+    onContinue={handleContinue}
+    onRestart={handleRestart}
+    onClose={() => {
+      setShowResume(false)
+      navigate('/dashboard')  // Go back to dashboard if dismissed
+    }}
+  />
+)}
       {showSubmit && (
         <SubmitModal
           unanswered={unansweredCount}
@@ -325,13 +338,14 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Answered counter — hidden on very small screens */}
+            {/* Answered counter */}
             <div className="hidden sm:flex items-center gap-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 shadow-sm">
               <span className="text-green-500 font-bold">
                 {Object.keys(answers).length}
               </span>
               /{quiz.questions.length}
             </div>
+
             {/* Mobile palette button */}
             <button
               onClick={() => setShowPalette(true)}
@@ -341,17 +355,24 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
                 size={15}
                 className="text-slate-600 dark:text-slate-300"
               />
-              {/* Badge showing answered count */}
               {Object.keys(answers).length > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                   {Object.keys(answers).length}
                 </span>
               )}
             </button>
+
             <Button
               variant="primary"
               size="sm"
-              onClick={() => setShowSubmit(true)}
+              onClick={() => {
+                // If no questions answered yet — submit directly without modal
+                if (Object.keys(answers).length === 0) {
+                  handleSubmit();
+                  return;
+                }
+                setShowSubmit(true);
+              }}
             >
               <Send size={13} />
               <span className="hidden sm:inline text-xs">Submit</span>
@@ -361,7 +382,7 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
 
         {/* ── Main layout ── */}
         <div className="flex gap-6 items-start">
-          {/* Question area — flex-1 so palette never overlaps */}
+          {/* Question area */}
           <div className="flex-1 min-w-0">
             {currentQuestion && (
               <QuestionCard
@@ -398,11 +419,16 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
                 <Button
                   variant="primary"
                   size="md"
-                  onClick={() => setShowSubmit(true)}
-                  className="shrink-0"
+                  onClick={() => {
+                    if (Object.keys(answers).length === 0) {
+                      handleSubmit();
+                      return;
+                    }
+                    setShowSubmit(true);
+                  }}
+                  className="flex-shrink-0"
                 >
-                  <span className="hidden sm:inline">Submit Quiz</span>
-                  <span className="sm:hidden">Submit</span>
+                  <span>Submit</span>
                   <Send size={14} />
                 </Button>
               ) : (
@@ -419,7 +445,7 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
             </div>
           </div>
 
-          {/* Desktop Palette — sticky, never overlaps content */}
+          {/* Desktop Palette */}
           <div className="hidden lg:block w-64 shrink-0">
             <div className="sticky top-24">
               <QuestionPalette
@@ -436,12 +462,12 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
       {/* Mobile Palette Drawer */}
       <div
         className={`
-      fixed top-0 right-0 h-full w-72 z-50
-      transform transition-transform duration-300
-      bg-white dark:bg-slate-800 shadow-2xl
-      lg:hidden
-      ${showPalette ? "translate-x-0" : "translate-x-full"}
-    `}
+          fixed top-0 right-0 h-full w-72 z-50
+          transform transition-transform duration-300
+          bg-white dark:bg-slate-800 shadow-2xl
+          lg:hidden
+          ${showPalette ? "translate-x-0" : "translate-x-full"}
+        `}
       >
         <div className="h-full overflow-y-auto p-4 pt-6">
           <QuestionPalette
@@ -459,16 +485,3 @@ const handleAnswer = useCallback(async (selectedOptionIndex) => {
 };
 
 export default QuizPage;
-
-// ```
-// ✅  Resume modal  — Continue or Start Fresh
-// ✅  Question card — clean layout with question number
-// ✅  4 option cards — A/B/C/D with color states
-// ✅  Answer reveal  — green correct / red wrong instantly
-// ✅  Explanation    — amber card shown after answering
-// ✅  Question palette — numbered grid, color coded
-// ✅  Dot progress bar — bottom navigation
-// ✅  Submit modal  — warns about unanswered questions
-// ✅  Mobile drawer — palette slides in from right
-// ✅  Sticky sidebar — palette fixed on desktop scroll
-// ✅  Every answer saved to DB in real time

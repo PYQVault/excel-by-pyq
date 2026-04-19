@@ -39,8 +39,8 @@ const EXAM_CONFIG = {
     badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   },
   CUET_PG: {
-    label: "CUET PG",
-    fullName: "Common University Entrance Test (PG)",
+    label: "NEET",
+    fullName: "National Eligibility cum Entrance Test — Undergraduate",
     icon: "📚",
     color: "from-purple-500 to-purple-600",
     lightBg: "bg-purple-50 dark:bg-purple-900/20",
@@ -126,184 +126,154 @@ const StatusBadge = ({ status }) => {
 
 // ── Quiz Card ──────────────────────────────────────────────────────────────
 const QuizCard = ({ quiz, attempt, onAction, examKey }) => {
-  const cfg = EXAM_CONFIG[examKey] || EXAM_CONFIG.CUET_UG;
   const status =
-    attempt?.status === "in_progress"
-      ? "in_progress"
-      : attempt?.status === "completed"
-        ? "completed"
-        : "not_started";
-
-  const scorePercent =
-    status === "completed"
-      ? Math.round((attempt.score / attempt.totalQuestions) * 100)
-      : null;
+    attempt?.status === 'in_progress' ? 'in_progress'
+    : attempt?.status === 'completed'  ? 'completed'
+    : 'not_started'
 
   const answeredCount = attempt?.answers
     ? Object.keys(attempt.answers).length
-    : 0;
+    : 0
+
+  // Score in marks (not percentage) — matches new +5/-1 system
+  const totalMarks = attempt?.score ?? null
+  const maxMarks   = (attempt?.totalQuestions ?? 0) * 5
+  const scorePercent = totalMarks !== null && maxMarks > 0
+    ? Math.max(0, Math.round((totalMarks / maxMarks) * 100))
+    : null
+
+  // Year + variant label: "2024", "2024 · A", "2024 · B"
+  const yearLabel = quiz.variant
+    ? `${quiz.year} · ${quiz.variant}`
+    : `${quiz.year}`
+
+  // Subject or fallback
+  const subjectLabel = quiz.subject || 'General Aptitude Test'
+
+  // Status bar color
+  const barColor =
+    status === 'completed'   ? 'bg-green-500'
+    : status === 'in_progress' ? 'bg-amber-400'
+    : 'bg-blue-500'
 
   return (
-    <div className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-lg transition-all duration-300 overflow-hidden">
-      {/* Top accent */}
-      <div
-        className={`h-1.5 w-full bg-linear-to-r ${
-          status === "completed"
-            ? "from-green-400 to-emerald-500"
-            : status === "in_progress"
-              ? "from-amber-400 to-orange-500"
-              : cfg.color
-        }`}
-      />
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all duration-200 overflow-hidden">
+
+      {/* Thin status bar */}
+      <div className={`h-1 w-full ${barColor}`} />
 
       <div className="p-5">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-3">
+
+        {/* Header row */}
+        <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span
-                className={`text-xs font-bold px-2 py-0.5 rounded-md ${cfg.badge}`}
-              >
-                {quiz.year}
+
+            {/* Year badge + subject */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+                {yearLabel}
               </span>
-              <span className="text-xs text-slate-400 dark:text-slate-500">
-                {quiz.subject}
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">
+                {subjectLabel}
               </span>
             </div>
-            <h3 className="font-bold text-slate-800 dark:text-white leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
-              {quiz.title}
-            </h3>
           </div>
+
           <StatusBadge status={status} />
         </div>
 
-        {/* Meta */}
-        <div className="flex items-center gap-3 mb-4 text-xs text-slate-500 dark:text-slate-400">
+        {/* Meta row */}
+        <div className="flex items-center gap-4 text-xs text-slate-400 dark:text-slate-500 mb-4">
           <span className="flex items-center gap-1">
-            <BookOpen size={12} className="text-blue-400" />
-            {quiz.questionCount} Qs
+            <BookOpen size={12} />
+            {quiz.questionCount} Questions
           </span>
           {quiz.timeLimitMinutes > 0 && (
             <span className="flex items-center gap-1">
-              <Clock size={12} className="text-blue-400" />
+              <Clock size={12} />
               {quiz.timeLimitMinutes} min
             </span>
           )}
-          <span className="flex items-center gap-1">
-            <Calendar size={12} className="text-blue-400" />
-            {quiz.year}
-          </span>
         </div>
 
-        {/* Progress bar for in_progress */}
-        {status === "in_progress" && (
+        {/* Progress bar — in progress */}
+        {status === 'in_progress' && (
           <div className="mb-4">
-            <div className="flex justify-between text-xs text-slate-500 mb-1">
+            <div className="flex justify-between text-xs text-slate-400 mb-1.5">
               <span>Progress</span>
-              <span>
-                {answeredCount}/{attempt.totalQuestions} answered
-              </span>
+              <span>{answeredCount} / {attempt.totalQuestions} answered</span>
             </div>
             <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-linear-to-r from-amber-400 to-orange-500 rounded-full transition-all"
-                style={{
-                  width: `${Math.round((answeredCount / attempt.totalQuestions) * 100)}%`,
-                }}
+                className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                style={{ width: `${Math.round((answeredCount / attempt.totalQuestions) * 100)}%` }}
               />
             </div>
           </div>
         )}
 
-        {/* Score for completed */}
-        {status === "completed" && scorePercent !== null && (
-          <div className="mb-4 flex items-center gap-3 bg-green-50 dark:bg-green-900/20 rounded-xl px-3 py-2.5">
-            <Trophy size={16} className="text-green-500 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                {attempt.score}/{attempt.totalQuestions} correct
-              </p>
-              <p className="text-xs text-slate-400">
-                {scorePercent >= 80
-                  ? "🌟 Excellent!"
-                  : scorePercent >= 60
-                    ? "👍 Good job!"
-                    : scorePercent >= 40
-                      ? "📚 Keep going"
-                      : "💪 Try again!"}
+        {/* Score row — completed */}
+        {status === 'completed' && totalMarks !== null && (
+          <div className="mb-4 flex items-center justify-between bg-slate-50 dark:bg-slate-700/40 rounded-xl px-4 py-3">
+            <div>
+              <p className="text-xs text-slate-400 mb-0.5">Score</p>
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                {totalMarks} / {maxMarks} marks
               </p>
             </div>
-            <span
-              className={`text-xl font-bold shrink-0 ${
-                scorePercent >= 80
-                  ? "text-green-500"
-                  : scorePercent >= 60
-                    ? "text-blue-500"
-                    : scorePercent >= 40
-                      ? "text-amber-500"
-                      : "text-red-500"
-              }`}
-            >
+            <span className={`text-xl font-black ${
+              scorePercent >= 80 ? 'text-green-500'
+              : scorePercent >= 60 ? 'text-blue-500'
+              : scorePercent >= 40 ? 'text-amber-500'
+              : 'text-red-500'
+            }`}>
               {scorePercent}%
             </span>
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex gap-2">
-          {status === "not_started" && (
-            <Button
-              variant="primary"
-              size="sm"
-              className="flex-1"
-              onClick={() => onAction(quiz._id, "start")}
-            >
+        {/* Action buttons */}
+        <div className="flex gap-2 mt-1">
+          {status === 'not_started' && (
+            <Button variant="primary" size="sm" className="flex-1"
+              onClick={() => onAction(quiz._id, 'start')}>
               <PlayCircle size={14} /> Start Quiz
             </Button>
           )}
-          {status === "in_progress" && (
+
+          {status === 'in_progress' && (
             <>
-              <Button
-                variant="primary"
-                size="sm"
-                className="flex-1"
-                onClick={() => onAction(quiz._id, "continue")}
-              >
+              <Button variant="primary" size="sm" className="flex-1"
+                onClick={() => onAction(quiz._id, 'continue')}>
                 <PlayCircle size={14} /> Continue
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onAction(quiz._id, "restart", attempt._id)}
-              >
+              <Button variant="ghost" size="sm"
+                onClick={() => onAction(quiz._id, 'restart', attempt._id)}
+                title="Restart">
                 <RotateCcw size={13} />
               </Button>
             </>
           )}
-          {status === "completed" && (
+
+          {status === 'completed' && (
             <>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="flex-1"
-                onClick={() => onAction(quiz._id, "results", attempt._id)}
-              >
-                <Trophy size={14} /> Results
+              <Button variant="secondary" size="sm" className="flex-1"
+                onClick={() => onAction(quiz._id, 'results', attempt._id)}>
+                <Trophy size={14} /> View Results
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onAction(quiz._id, "restart", attempt._id)}
-              >
+              <Button variant="ghost" size="sm"
+                onClick={() => onAction(quiz._id, 'restart', attempt._id)}
+                title="Retake">
                 <RotateCcw size={13} />
               </Button>
             </>
           )}
         </div>
+
       </div>
     </div>
-  );
-};
+  )
+}
 
 // ── MAIN DASHBOARD ─────────────────────────────────────────────────────────
 const DashboardPage = () => {
@@ -366,7 +336,7 @@ const DashboardPage = () => {
         };
 
         // Only add subject param if it's a real subject
-        if (selectedSubject && selectedSubject !== "__none__") {
+        if (selectedSubject && selectedSubject !== "General Aptitude") {
           params.subject = selectedSubject;
         }
 
@@ -459,12 +429,11 @@ const DashboardPage = () => {
   };
 
   // ── Breadcrumb items ─────────────────────────────────────────────────
-  // Update breadcrumbs array:
   const breadcrumbs = ["Home"];
   if (selectedExam)
     breadcrumbs.push(EXAM_CONFIG[selectedExam]?.label || selectedExam);
   if (selectedStream) breadcrumbs.push(selectedStream);
-  if (selectedSubject && selectedSubject !== "__none__") {
+  if (selectedSubject && selectedSubject !== "General Aptitude") {
     breadcrumbs.push(selectedSubject);
   }
 
@@ -661,7 +630,7 @@ const DashboardPage = () => {
               <div>
                 <Breadcrumb items={breadcrumbs} onNavigate={handleBreadcrumb} />
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
-                  Select Stream
+                  Select Section
                 </h2>
               </div>
             </div>
@@ -679,22 +648,17 @@ const DashboardPage = () => {
                   return (
                     <button
                       key={stream}
-                      // onClick={() => {
-                      //   setSelectedStream(stream);
-                      //   setView("subject");
-                      // }}
-                      // In the stream view — update the card click handler:
                       onClick={() => {
                         setSelectedStream(stream);
                         const subjects = meta[selectedExam][stream];
                         const subjectKeys = Object.keys(subjects);
 
-                        // If only key is '__none__' → no subjects → go straight to quizzes
+                        // If only key is 'General Aptitude' → no subjects → go straight to quizzes
                         if (
                           subjectKeys.length === 1 &&
-                          subjectKeys[0] === "__none__"
+                          subjectKeys[0] === "General Aptitude"
                         ) {
-                          setSelectedSubject("__none__");
+                          setSelectedSubject("General Aptitude");
                           setView("quizzes");
                         } else {
                           setView("subject");
@@ -758,7 +722,7 @@ const DashboardPage = () => {
               <div>
                 <Breadcrumb items={breadcrumbs} onNavigate={handleBreadcrumb} />
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
-                  Select Subject
+                  Select Domain Specific Subject
                 </h2>
               </div>
             </div>
@@ -768,7 +732,7 @@ const DashboardPage = () => {
                 ([subjectKey, papers]) => {
                   const cfg = EXAM_CONFIG[selectedExam];
                   const displayName =
-                    subjectKey === "__none__" ? selectedStream : subjectKey;
+                    subjectKey === "General Aptitude" ? selectedStream : subjectKey;
 
                   return (
                     <button
@@ -868,7 +832,7 @@ const DashboardPage = () => {
 
         <div className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700/50 text-center">
           <p className="text-sm text-slate-400 dark:text-slate-500 mb-3">
-            Found a bug? Have a suggestion? We'd love to hear from you.
+             Have a suggestion? We'd love to hear from you.
           </p>
           <button
             onClick={() => navigate("/feedback")}

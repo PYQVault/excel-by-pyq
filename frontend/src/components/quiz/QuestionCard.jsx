@@ -148,10 +148,10 @@ const QuestionCard = ({
               </div>
             </div>
             <div className="px-5 py-4 bg-white dark:bg-slate-800">
-              <p className="text-sm text-slate-700 dark:text-slate-200 leading-7">
-                {question.explanation || 'No explanation provided.'}
-              </p>
-            </div>
+  <p className="text-sm text-slate-700 dark:text-slate-200 leading-7 whitespace-pre-wrap">
+    {question.explanation || 'No explanation provided.'}
+  </p>
+</div>
           </div>
         </div>
       )}

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+
+# Don't index user-specific pages
+Disallow: /quiz/
+Disallow: /results/
+Disallow: /admin
+
+Sitemap: https://www.excelbypyq.com/sitemap.xml

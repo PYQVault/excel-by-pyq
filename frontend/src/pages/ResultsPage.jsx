@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
   Trophy, CheckCircle2, XCircle, MinusCircle,
   RotateCcw, LayoutDashboard, ChevronDown, ChevronUp,
-  Target, Clock, BookOpen, TrendingUp, Award, Lightbulb
+  Clock, BookOpen, TrendingUp, Lightbulb
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '@/api/axios'
@@ -15,10 +15,10 @@ import clsx from 'clsx'
 
 // ── Score Ring ─────────────────────────────────────────────────────────────
 const ScoreRing = ({ percentage }) => {
-  const radius      = 54
-  const stroke      = 8
+  const radius        = 54
+  const stroke        = 8
   const circumference = 2 * Math.PI * radius
-  const offset      = circumference - (percentage / 100) * circumference
+  const offset        = circumference - (percentage / 100) * circumference
 
   const color =
     percentage >= 80 ? '#22c55e' :
@@ -61,7 +61,7 @@ const ScoreRing = ({ percentage }) => {
 // ── Stat Pill ──────────────────────────────────────────────────────────────
 const StatPill = ({ icon: Icon, label, value, color, bg }) => (
   <div className={`flex items-center gap-3 ${bg} rounded-2xl px-5 py-4`}>
-    <div className={`w-10 h-10 bg-white/60 dark:bg-black/20 rounded-xl flex items-center justify-center shrink-0`}>
+    <div className="w-10 h-10 bg-white/60 dark:bg-black/20 rounded-xl flex items-center justify-center shrink-0">
       <Icon size={18} className={color} />
     </div>
     <div>
@@ -77,9 +77,9 @@ const ReviewCard = ({ result, index }) => {
   const labels = ['A', 'B', 'C', 'D']
 
   const statusConfig = {
-    correct:     { icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-200 dark:border-green-700/50', badge: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
-    wrong:       { icon: XCircle,      color: 'text-red-500',   bg: 'bg-red-50 dark:bg-red-900/20',     border: 'border-red-200 dark:border-red-700/50',     badge: 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300' },
-    unattempted: { icon: MinusCircle,  color: 'text-slate-400', bg: 'bg-slate-50 dark:bg-slate-800',    border: 'border-slate-200 dark:border-slate-700',    badge: 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400' },
+    correct:     { icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20',  border: 'border-green-200 dark:border-green-700/50',  badge: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
+    wrong:       { icon: XCircle,      color: 'text-red-500',   bg: 'bg-red-50 dark:bg-red-900/20',      border: 'border-red-200 dark:border-red-700/50',      badge: 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300' },
+    unattempted: { icon: MinusCircle,  color: 'text-slate-400', bg: 'bg-slate-50 dark:bg-slate-800',     border: 'border-slate-200 dark:border-slate-700',     badge: 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400' },
   }
 
   const status = !result.isAttempted ? 'unattempted' : result.isCorrect ? 'correct' : 'wrong'
@@ -95,10 +95,7 @@ const ReviewCard = ({ result, index }) => {
       {/* Question row — always visible */}
       <button
         onClick={() => setExpanded((p) => !p)}
-        className={clsx(
-          'w-full text-left flex items-start gap-4 px-5 py-4',
-          cfg.bg
-        )}
+        className={clsx('w-full text-left flex items-start gap-4 px-5 py-4', cfg.bg)}
       >
         {/* Number */}
         <div className={clsx(
@@ -111,8 +108,8 @@ const ReviewCard = ({ result, index }) => {
         {/* Question text */}
         <div className="flex-1 min-w-0">
           <div className="mb-4">
-  <QuestionText text={result.questionText} />
-</div>
+            <QuestionText text={result.questionText} />
+          </div>
           {!expanded && (
             <p className={clsx('text-xs mt-1 font-medium', cfg.color)}>
               {status === 'correct'     && '✓ Correct'}
@@ -126,7 +123,7 @@ const ReviewCard = ({ result, index }) => {
         <div className="flex items-center gap-2 shrink-0">
           <Icon size={18} className={cfg.color} />
           {expanded
-            ? <ChevronUp size={15} className="text-slate-400" />
+            ? <ChevronUp   size={15} className="text-slate-400" />
             : <ChevronDown size={15} className="text-slate-400" />
           }
         </div>
@@ -162,7 +159,6 @@ const ReviewCard = ({ result, index }) => {
                     !isCorrectOpt && !isWrongPick && 'border-slate-100 dark:border-slate-700 opacity-60'
                   )}
                 >
-                  {/* Label */}
                   <span className={clsx(
                     'w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0',
                     isCorrectOpt  && 'bg-green-500 text-white',
@@ -181,7 +177,6 @@ const ReviewCard = ({ result, index }) => {
                     {opt.text}
                   </span>
 
-                  {/* Tick / Cross */}
                   {isCorrectOpt && <CheckCircle2 size={16} className="text-green-500 shrink-0" />}
                   {isWrongPick  && <XCircle      size={16} className="text-red-400 shrink-0" />}
                 </div>
@@ -232,7 +227,7 @@ const ReviewCard = ({ result, index }) => {
               </div>
             </div>
             <div className="px-5 py-4 bg-white dark:bg-slate-800">
-              <p className="text-sm text-slate-700 dark:text-slate-200 leading-7">
+              <p className="text-sm text-slate-700 dark:text-slate-200 leading-7 whitespace-pre-wrap">
                 {result.explanation || 'No explanation provided.'}
               </p>
             </div>
@@ -246,11 +241,11 @@ const ReviewCard = ({ result, index }) => {
 
 // ── Performance message ────────────────────────────────────────────────────
 const getPerformance = (pct) => {
-  if (pct >= 90) return { emoji: '🏆', label: 'Outstanding!',     sub: 'You absolutely nailed it!',          color: 'text-yellow-500' }
-  if (pct >= 80) return { emoji: '🌟', label: 'Excellent!',       sub: 'Great performance, keep it up!',     color: 'text-green-500'  }
-  if (pct >= 60) return { emoji: '👍', label: 'Good Job!',        sub: 'Solid effort, review the misses.',   color: 'text-blue-500'   }
-  if (pct >= 40) return { emoji: '📚', label: 'Keep Practicing!', sub: 'Review the answers below carefully.',color: 'text-amber-500'  }
-  return           { emoji: '💪', label: 'Don\'t Give Up!',       sub: 'Go through each answer and retry.',  color: 'text-red-500'    }
+  if (pct >= 90) return { emoji: '🏆', label: 'Outstanding!',     sub: 'You absolutely nailed it!',           color: 'text-yellow-500' }
+  if (pct >= 80) return { emoji: '🌟', label: 'Excellent!',       sub: 'Great performance, keep it up!',      color: 'text-green-500'  }
+  if (pct >= 60) return { emoji: '👍', label: 'Good Job!',        sub: 'Solid effort, review the misses.',    color: 'text-blue-500'   }
+  if (pct >= 40) return { emoji: '📚', label: 'Keep Practicing!', sub: 'Review the answers below carefully.', color: 'text-amber-500'  }
+  return           { emoji: '💪', label: "Don't Give Up!",        sub: 'Go through each answer and retry.',   color: 'text-red-500'    }
 }
 
 // ── Main Results Page ──────────────────────────────────────────────────────
@@ -259,9 +254,9 @@ const ResultsPage = () => {
   const navigate      = useNavigate()
   const location      = useLocation()
 
-  const [results, setResults]   = useState(null)
-  const [loading, setLoading]   = useState(true)
-  const [filter, setFilter]     = useState('all') // all | correct | wrong | unattempted
+  const [results, setResults]     = useState(null)
+  const [loading, setLoading]     = useState(true)
+  const [filter, setFilter]       = useState('all') // all | correct | wrong | unattempted
   const [animating, setAnimating] = useState(true)
 
   // ── Load results ────────────────────────────────────────────────────
@@ -296,14 +291,21 @@ const ResultsPage = () => {
   if (loading) return <Loader text="Loading your results..." />
   if (!results) return null
 
-  const { score, totalQuestions, scorePercentage, timeTaken } = results
-  const unattempted = results.results.filter((r) => !r.isAttempted).length
-  const wrong       = results.results.filter((r) => r.isAttempted && !r.isCorrect).length
-  const perf        = getPerformance(scorePercentage)
+  // ── Destructure new scoring fields from API ──────────────────────────
+  const {
+    totalMarks,
+    maxMarks,
+    correctCount,
+    wrongCount,
+    unattemptedCount,
+    scorePercentage,
+    timeTaken,
+    markingScheme,
+  } = results
 
-  // Format time
-  const mins = Math.floor((timeTaken || 0) / 60)
-  const secs = ((timeTaken || 0) % 60).toString().padStart(2, '0')
+  const perf   = getPerformance(scorePercentage)
+  const mins   = Math.floor((timeTaken || 0) / 60)
+  const secs   = ((timeTaken || 0) % 60).toString().padStart(2, '0')
   const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`
 
   // Filtered questions
@@ -333,66 +335,81 @@ const ResultsPage = () => {
           )} />
 
           <div className="p-5 sm:p-8">
-  <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start sm:gap-10">
+            <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start sm:gap-10">
 
-    {/* Score Ring — centered on mobile */}
-    <div className="shrink-0 mx-auto sm:mx-0">
-      {!animating && <ScoreRing percentage={scorePercentage} />}
-    </div>
+              {/* Score Ring — centered on mobile */}
+              <div className="shrink-0 mx-auto sm:mx-0">
+                {!animating && <ScoreRing percentage={scorePercentage} />}
+              </div>
 
-    {/* Performance */}
-    <div className="flex-1 text-center sm:text-left">
-      <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
-        <span className="text-2xl sm:text-3xl">{perf.emoji}</span>
-        <h1 className={clsx('text-xl sm:text-2xl font-black', perf.color)}>
-          {perf.label}
-        </h1>
-      </div>
-      <p className="text-slate-500 dark:text-slate-400 text-sm mb-3 sm:mb-5">
-        {perf.sub}
-      </p>
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        You scored{' '}
-        <span className="font-bold text-slate-800 dark:text-white">
-          {score} out of {totalQuestions}
-        </span>{' '}
-        correctly.
-      </p>
+              {/* Performance */}
+              <div className="flex-1 text-center sm:text-left">
+                <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
+                  <span className="text-2xl sm:text-3xl">{perf.emoji}</span>
+                  <h1 className={clsx('text-xl sm:text-2xl font-black', perf.color)}>
+                    {perf.label}
+                  </h1>
+                </div>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mb-3 sm:mb-4">
+                  {perf.sub}
+                </p>
 
-      {/* Action buttons — inside card on mobile */}
-      <div className="flex gap-2 mt-5 sm:hidden justify-center">
-        <Button variant="primary" size="sm" onClick={() => navigate('/dashboard')}>
-          <LayoutDashboard size={14} /> Dashboard
-        </Button>
-        <Button variant="secondary" size="sm" onClick={() => navigate(-1)}>
-          <RotateCcw size={14} /> Retry
-        </Button>
-      </div>
-    </div>
+                {/* Score summary text */}
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  You scored{' '}
+                  <span className="font-bold text-slate-800 dark:text-white text-base">
+                    {totalMarks} out of {maxMarks} marks
+                  </span>
+                  {' '}({correctCount} correct · {wrongCount} wrong · {unattemptedCount} unattempted)
+                </p>
 
-    {/* Action buttons — desktop only */}
-    <div className="hidden sm:flex sm:flex-col gap-3 shrink-0">
-      <Button variant="primary" size="md" onClick={() => navigate('/dashboard')}>
-        <LayoutDashboard size={15} /> Dashboard
-      </Button>
-      <Button variant="secondary" size="md" onClick={() => navigate(-1)}>
-        <RotateCcw size={15} /> Retry
-      </Button>
-    </div>
-  </div>
-</div>
+                {/* Marking scheme badges */}
+                <div className="flex items-center gap-2 mt-2 flex-wrap justify-center sm:justify-start">
+                  <span className="text-xs bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 px-2.5 py-1 rounded-full font-semibold">
+                    +{markingScheme?.correct} correct
+                  </span>
+                  <span className="text-xs bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 px-2.5 py-1 rounded-full font-semibold">
+                    {markingScheme?.wrong} wrong
+                  </span>
+                  <span className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded-full font-semibold">
+                    0 unattempted
+                  </span>
+                </div>
 
-{/* Stats — 2 cols on mobile */}
-<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-4 sm:px-8 pb-5 sm:pb-8">
-  <StatPill icon={CheckCircle2} label="Correct" value={score}
-    color="text-green-600 dark:text-green-400" bg="bg-green-50 dark:bg-green-900/20" />
-  <StatPill icon={XCircle} label="Wrong" value={wrong}
-    color="text-red-500 dark:text-red-400" bg="bg-red-50 dark:bg-red-900/20" />
-  <StatPill icon={MinusCircle} label="Skipped" value={unattempted}
-    color="text-slate-500 dark:text-slate-400" bg="bg-slate-100 dark:bg-slate-700/50" />
-  <StatPill icon={Clock} label="Time" value={timeStr}
-    color="text-blue-500 dark:text-blue-400" bg="bg-blue-50 dark:bg-blue-900/20" />
-</div>
+                {/* Action buttons — inside card on mobile */}
+                <div className="flex gap-2 mt-5 sm:hidden justify-center">
+                  <Button variant="primary" size="sm" onClick={() => navigate('/dashboard')}>
+                    <LayoutDashboard size={14} /> Dashboard
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => navigate(-1)}>
+                    <RotateCcw size={14} /> Retry
+                  </Button>
+                </div>
+              </div>
+
+              {/* Action buttons — desktop only */}
+              <div className="hidden sm:flex sm:flex-col gap-3 shrink-0">
+                <Button variant="primary" size="md" onClick={() => navigate('/dashboard')}>
+                  <LayoutDashboard size={15} /> Dashboard
+                </Button>
+                <Button variant="secondary" size="md" onClick={() => navigate(-1)}>
+                  <RotateCcw size={15} /> Retry
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats — 2 cols on mobile, 4 on desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-4 sm:px-8 pb-5 sm:pb-8">
+            <StatPill icon={CheckCircle2} label="Correct" value={correctCount}
+              color="text-green-600 dark:text-green-400" bg="bg-green-50 dark:bg-green-900/20" />
+            <StatPill icon={XCircle} label="Wrong" value={wrongCount}
+              color="text-red-500 dark:text-red-400" bg="bg-red-50 dark:bg-red-900/20" />
+            <StatPill icon={MinusCircle} label="Unattempted" value={unattemptedCount}
+              color="text-slate-500 dark:text-slate-400" bg="bg-slate-100 dark:bg-slate-700/50" />
+            <StatPill icon={Trophy} label="Total Marks" value={`${totalMarks}/${maxMarks}`}
+              color="text-blue-500 dark:text-blue-400" bg="bg-blue-50 dark:bg-blue-900/20" />
+          </div>
         </div>
 
         {/* ── Accuracy Bar ─────────────────────────────────────────── */}
@@ -403,28 +420,28 @@ const ResultsPage = () => {
               Answer Breakdown
             </h2>
             <span className="text-xs text-slate-400">
-              {totalQuestions} total questions
+              {results.results?.length} total questions
             </span>
           </div>
 
           {/* Stacked bar */}
           <div className="flex h-3 rounded-full overflow-hidden gap-px bg-slate-100 dark:bg-slate-700 mb-3">
-            {score > 0 && (
+            {correctCount > 0 && (
               <div
                 className="bg-green-400 rounded-l-full transition-all duration-1000"
-                style={{ width: `${(score / totalQuestions) * 100}%` }}
+                style={{ width: `${(correctCount / results.results?.length) * 100}%` }}
               />
             )}
-            {wrong > 0 && (
+            {wrongCount > 0 && (
               <div
                 className="bg-red-400 transition-all duration-1000"
-                style={{ width: `${(wrong / totalQuestions) * 100}%` }}
+                style={{ width: `${(wrongCount / results.results?.length) * 100}%` }}
               />
             )}
-            {unattempted > 0 && (
+            {unattemptedCount > 0 && (
               <div
                 className="bg-slate-300 dark:bg-slate-600 rounded-r-full transition-all duration-1000"
-                style={{ width: `${(unattempted / totalQuestions) * 100}%` }}
+                style={{ width: `${(unattemptedCount / results.results?.length) * 100}%` }}
               />
             )}
           </div>
@@ -432,15 +449,15 @@ const ResultsPage = () => {
           <div className="flex items-center gap-5 text-xs">
             <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
               <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
-              Correct {Math.round((score / totalQuestions) * 100)}%
+              Correct {Math.round((correctCount / results.results?.length) * 100)}%
             </span>
             <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
               <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
-              Wrong {Math.round((wrong / totalQuestions) * 100)}%
+              Wrong {Math.round((wrongCount / results.results?.length) * 100)}%
             </span>
             <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
               <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600" />
-              Skipped {Math.round((unattempted / totalQuestions) * 100)}%
+              Unattempted {Math.round((unattemptedCount / results.results?.length) * 100)}%
             </span>
           </div>
         </div>
@@ -448,40 +465,38 @@ const ResultsPage = () => {
         {/* ── Question Review ───────────────────────────────────────── */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
 
-          {/* Review header */}
-         {/* Filter tabs — scrollable on mobile */}
-<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-700">
-  <h2 className="font-bold text-slate-800 dark:text-white flex items-center gap-2 text-sm sm:text-base">
-    <BookOpen size={16} className="text-blue-500" />
-    Question Review
-    <span className="text-xs font-normal text-slate-400">
-      ({filtered.length} shown)
-    </span>
-  </h2>
+          {/* Filter tabs — scrollable on mobile */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+            <h2 className="font-bold text-slate-800 dark:text-white flex items-center gap-2 text-sm sm:text-base">
+              <BookOpen size={16} className="text-blue-500" />
+              Question Review
+              <span className="text-xs font-normal text-slate-400">
+                ({filtered.length} shown)
+              </span>
+            </h2>
 
-  {/* Scrollable filter row on mobile */}
-  <div className="flex gap-1 overflow-x-auto pb-1 sm:pb-0 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-1 scrollbar-hide">
-    {[
-      { key: 'all',         label: `All (${totalQuestions})` },
-      { key: 'correct',     label: `✓ Correct (${score})` },
-      { key: 'wrong',       label: `✗ Wrong (${wrong})` },
-      { key: 'unattempted', label: `— Skipped (${unattempted})` },
-    ].map((tab) => (
-      <button
-        key={tab.key}
-        onClick={() => setFilter(tab.key)}
-        className={clsx(
-          'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0',
-          filter === tab.key
-            ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm'
-            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-        )}
-      >
-        {tab.label}
-      </button>
-    ))}
-  </div>
-</div>
+            <div className="flex gap-1 overflow-x-auto pb-1 sm:pb-0 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-1 scrollbar-hide">
+              {[
+                { key: 'all',         label: `All (${results.results?.length})` },
+                { key: 'correct',     label: `✓ Correct (${correctCount})` },
+                { key: 'wrong',       label: `✗ Wrong (${wrongCount})` },
+                { key: 'unattempted', label: `— Unattempted (${unattemptedCount})` },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setFilter(tab.key)}
+                  className={clsx(
+                    'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0',
+                    filter === tab.key
+                      ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Review list */}
           <div className="p-4 sm:p-6 flex flex-col gap-3">
@@ -490,7 +505,7 @@ const ResultsPage = () => {
                 <p className="text-slate-400 text-sm">No questions in this category</p>
               </div>
             ) : (
-              filtered.map((result, i) => (
+              filtered.map((result) => (
                 <ReviewCard
                   key={result.questionNumber}
                   result={result}
