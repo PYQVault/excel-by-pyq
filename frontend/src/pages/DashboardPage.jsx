@@ -410,23 +410,33 @@ const DashboardPage = () => {
   };
 
   const handleAction = async (quizId, action, attemptId) => {
-    if (action === "results") {
-      navigate(`/results/${attemptId}`);
-      return;
-    }
-    if (action === "restart") {
-      const existing = attempts[quizId];
-      if (existing?.status === "in_progress") {
-        try {
-          await api.post(`/attempts/${existing._id}/abandon`);
-        } catch {
-          toast.error("Could not restart");
-          return;
-        }
+  if (action === 'results') {
+    navigate(`/results/${attemptId}`)
+    return
+  }
+
+  if (action === 'restart') {
+    const existing = attempts[quizId]
+    if (existing && (existing.status === 'in_progress' || existing.status === 'completed')) {
+      try {
+        await api.post(`/attempts/${existing._id}/abandon`)
+        setAttempts((prev) => {
+          const copy = { ...prev }
+          delete copy[quizId]
+          return copy
+        })
+      } catch {
+        toast.error('Could not restart. Try again.')
+        return
       }
     }
-    navigate(`/quiz/${quizId}`);
-  };
+    // ── Pass fresh:true so QuizPage skips resume modal ──────────────
+    navigate(`/quiz/${quizId}`, { state: { fresh: true } })
+    return
+  }
+
+  navigate(`/quiz/${quizId}`)
+}
 
   // ── Breadcrumb items ─────────────────────────────────────────────────
   const breadcrumbs = ["Home"];

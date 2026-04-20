@@ -21,49 +21,34 @@ const startOrResumeAttempt = async (req, res, next) => {
       return next(new Error('Quiz not found'))
     }
 
-    // ── Check for in_progress attempt first ───────────────────────
-    const inProgressAttempt = await QuizAttempt.findOne({
-      userId,
-      quizId,
-      status: 'in_progress',
+    // 1. Check for in_progress
+    const inProgress = await QuizAttempt.findOne({
+      userId, quizId, status: 'in_progress',
     })
 
-    if (inProgressAttempt) {
-      const answersObj = Object.fromEntries(inProgressAttempt.answers)
+    if (inProgress) {
+      const answersObj = Object.fromEntries(inProgress.answers)
       return res.status(200).json({
-        success:     true,
-        isResuming:  true,
-        data: {
-          ...inProgressAttempt.toObject(),
-          answers: answersObj,
-        },
+        success: true, isResuming: true,
+        data: { ...inProgress.toObject(), answers: answersObj },
       })
     }
 
-    // ── Check for completed attempt ───────────────────────────────
-    // If user navigates back to quiz after completing it
-    const completedAttempt = await QuizAttempt.findOne({
-      userId,
-      quizId,
-      status: 'completed',
-    }).sort({ completedAt: -1 })  // Most recent completed
+    // 2. Check for completed (only show if navigating normally)
+    const completed = await QuizAttempt.findOne({
+      userId, quizId, status: 'completed',
+    }).sort({ completedAt: -1 })
 
-    if (completedAttempt) {
-      // Return completed attempt — frontend will redirect to results
+    if (completed) {
       return res.status(200).json({
-        success:     true,
-        isResuming:  false,
-        data: {
-          ...completedAttempt.toObject(),
-          answers: Object.fromEntries(completedAttempt.answers),
-        },
+        success: true, isResuming: false,
+        data: { ...completed.toObject(), answers: Object.fromEntries(completed.answers) },
       })
     }
 
-    // ── Fresh start ───────────────────────────────────────────────
+    // 3. No attempt found — create fresh
     const attempt = await QuizAttempt.create({
-      userId,
-      quizId,
+      userId, quizId,
       totalQuestions:       quiz.questions.length,
       currentQuestionIndex: 0,
       answers:              {},
@@ -71,12 +56,8 @@ const startOrResumeAttempt = async (req, res, next) => {
     })
 
     res.status(201).json({
-      success:    true,
-      isResuming: false,
-      data: {
-        ...attempt.toObject(),
-        answers: {},
-      },
+      success: true, isResuming: false,
+      data: { ...attempt.toObject(), answers: {} },
     })
   } catch (error) {
     next(error)
@@ -225,7 +206,8 @@ const submitAttempt = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
-        attemptId:        attempt._id,
+        attemptId:attempt._id,
+        quizId: attempt.quizId,
         totalMarks,
         maxMarks,
         correctCount,
@@ -248,27 +230,30 @@ const submitAttempt = async (req, res, next) => {
 const abandonAttempt = async (req, res, next) => {
   try {
     const attempt = await QuizAttempt.findOne({
-      _id: req.params.id,
+      _id:    req.params.id,
       userId: req.user._id,
-      status: 'in_progress',
-    });
+      status: { $in: ['in_progress', 'completed'] },  // ← both statuses
+    })
 
     if (!attempt) {
-      res.status(404);
-      return next(new Error('Active attempt not found'));
+      // Don't error — just return success silently
+      return res.status(200).json({
+        success: true,
+        message: 'Attempt already abandoned or not found.',
+      })
     }
 
-    attempt.status = 'abandoned';
-    await attempt.save();
+    attempt.status = 'abandoned'
+    await attempt.save()
 
     res.status(200).json({
       success: true,
       message: 'Attempt abandoned. You can start fresh.',
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 // ── @route  GET /api/attempts/my-attempts ─────────────────────────────────
 // ── @access Private
@@ -364,6 +349,7 @@ const getAttemptResults = async (req, res, next) => {
       success: true,
       data: {
         attemptId:        attempt._id,
+        quizId:     attempt.quizId,
         // ── Same field names as submitAttempt ──
         totalMarks,
         maxMarks,

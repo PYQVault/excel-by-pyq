@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
   ChevronLeft,
   ChevronRight,
@@ -113,70 +113,81 @@ const SubmitModal = ({ unanswered, onConfirm, onCancel, loading }) => (
 );
 
 // ── Main Quiz Page ─────────────────────────────────────────────────────────
+
 const QuizPage = () => {
-  const { quizId } = useParams();
-  const navigate = useNavigate();
+  const { quizId }  = useParams()
+  const navigate    = useNavigate()
+  const location    = useLocation()
 
-  // Core state
-  const [quiz, setQuiz] = useState(null);
-  const [attempt, setAttempt] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [showResume, setShowResume] = useState(false);
+  const [quiz, setQuiz]           = useState(null)
+  const [attempt, setAttempt]     = useState(null)
+  const [loading, setLoading]     = useState(true)
+  const [showResume, setShowResume] = useState(false)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [answers, setAnswers]     = useState({})
+  const [showPalette, setShowPalette] = useState(false)
+  const [showSubmit, setShowSubmit]   = useState(false)
+  const [submitting, setSubmitting]   = useState(false)
+  const topRef = useRef(null)
 
-  // Question navigation
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
-  // answers = { [questionId]: { selectedOptionIndex, isCorrect, correctOptionIndex } }
-
-  // UI state
-  const [showPalette, setShowPalette] = useState(false);
-  const [showSubmit, setShowSubmit] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  const topRef = useRef(null);
-
-  // ── Load quiz + start/resume attempt ──────────────────────────────────
   useEffect(() => {
     const init = async () => {
       try {
-        const { data: quizData } = await api.get(`/quizzes/${quizId}`);
-        setQuiz(quizData.data);
+        // Read fresh flag INSIDE the effect
+        const isFresh = location.state?.fresh === true
 
-        const { data: attemptData } = await api.post("/attempts/start", {
-          quizId,
-        });
+        // 1. Fetch quiz
+        const { data: quizData } = await api.get(`/quizzes/${quizId}`)
+        setQuiz(quizData.data)
 
-        // ── If attempt is already completed → go to results ──────────
-        if (attemptData.data.status === "completed") {
-          navigate(`/results/${attemptData.data._id}`, { replace: true });
-          return;
+        // 2. Start or resume attempt
+        const { data: attemptData } = await api.post('/attempts/start', { quizId })
+
+        const status = attemptData.data.status
+
+        // 3. If completed AND not a fresh restart → redirect to results
+        if (status === 'completed' && !isFresh) {
+          navigate(`/results/${attemptData.data._id}`, { replace: true })
+          return
         }
 
-        setAttempt(attemptData.data);
+        // 4. Set attempt
+        setAttempt(attemptData.data)
 
-        if (attemptData.isResuming) {
-          const restored = {};
-          const rawAnswers = attemptData.data.answers || {};
+        // 5. If resuming AND not a fresh restart → restore answers + show modal
+        if (attemptData.isResuming && !isFresh && status === 'in_progress') {
+          const restored = {}
+          const rawAnswers = attemptData.data.answers || {}
           Object.entries(rawAnswers).forEach(([qId, ans]) => {
             restored[qId] = {
               selectedOptionIndex: ans.selectedOptionIndex,
-              isCorrect: ans.isCorrect,
-              correctOptionIndex: null,
-            };
-          });
-          setAnswers(restored);
-          setCurrentIndex(attemptData.data.currentQuestionIndex || 0);
-          setShowResume(true);
+              isCorrect:           ans.isCorrect,
+              correctOptionIndex:  null,
+            }
+          })
+          setAnswers(restored)
+          setCurrentIndex(attemptData.data.currentQuestionIndex || 0)
+          setShowResume(true)
         }
+
+        // 6. Fresh start — reset everything
+        if (isFresh) {
+          setAnswers({})
+          setCurrentIndex(0)
+          setShowResume(false)
+        }
+
       } catch (err) {
-        toast.error("Failed to load quiz");
-        navigate("/dashboard");
+        console.error('Quiz load error:', err)
+        toast.error('Failed to load quiz')
+        navigate('/dashboard')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-    init();
-  }, [quizId]);
+    }
+
+    init()
+  }, [quizId])  
 
   // ── Scroll to top on question change ─────────────────────────────────
   useEffect(() => {
