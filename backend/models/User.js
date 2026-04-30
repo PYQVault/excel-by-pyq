@@ -3,66 +3,56 @@ const bcrypt   = require('bcryptjs')
 
 const UserSchema = new mongoose.Schema({
   name: {
-    type: String,
+    type:     String,
     required: true,
-    trim: true,
+    trim:     true,
   },
   email: {
-    type: String,
-    required: true,
-    unique: true,
+    type:      String,
+    required:  true,
+    unique:    true,
     lowercase: true,
-    trim: true,
+    trim:      true,
   },
   password: {
-    type: String,
+    type:      String,
     minlength: 6,
-    select: false,
-    // Not required — Google users won't have a password
+    select:    false,
   },
   role: {
-    type: String,
-    enum: ['student', 'admin'],
+    type:    String,
+    enum:    ['student', 'admin'],
     default: 'student',
   },
-
-  // ── Google OAuth ───────────────────────────────────────────────────
-  googleId: {
-    type: String,
-    default: null,
-  },
-  avatar: {
-    type: String,
-    default: null,   // Google profile picture URL
-  },
+  googleId:     { type: String,  default: null },
+  avatar:       { type: String,  default: null },
   authProvider: {
-    type: String,
-    enum: ['local', 'google'],
+    type:    String,
+    enum:    ['local', 'google'],
     default: 'local',
   },
 
+  // ── Email Verification ─────────────────────────────────────────────
+  isVerified:   { type: Boolean, default: false },
+  otpCode:      { type: String,  default: null, select: false },
+  otpExpiresAt: { type: Date,    default: null, select: false },
+  otpAttempts:  { type: Number,  default: 0,    select: false },
+
   // ── Password Reset ─────────────────────────────────────────────────
-  resetPasswordToken: {
-    type: String,
-    default: null,
-    select: false,
-  },
-  resetPasswordExpires: {
-    type: Date,
-    default: null,
-    select: false,
-  },
+  resetPasswordToken:   { type: String, default: null, select: false },
+  resetPasswordExpires: { type: Date,   default: null, select: false },
 
 }, { timestamps: true })
 
-// Hash password before saving
+// Hash password before save
 UserSchema.pre('save', async function () {
   if (!this.isModified('password') || !this.password) return
   this.password = await bcrypt.hash(this.password, 12)
 })
 
-UserSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password)
+// Compare password method
+UserSchema.methods.comparePassword = async function (candidate) {
+  return await bcrypt.compare(candidate, this.password)
 }
 
 module.exports = mongoose.model('User', UserSchema)

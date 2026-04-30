@@ -15,6 +15,9 @@ import ResultsPage from "@/pages/ResultsPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import AdminPage from "@/pages/AdminPage";
 import FeedbackPage from "@/pages/FeedbackPage";
+import VerifyOTPPage from "@/pages/VerifyOTPPage";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
+import TermsPage from "@/pages/TermsPage";
 
 const App = () => (
   <ThemeProvider>
@@ -41,6 +44,9 @@ const App = () => (
             path="/auth/google/success"
             element={<GoogleAuthSuccessPage />}
           />
+          <Route path="/verify-otp" element={<VerifyOTPPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
 
           {/* Protected */}
           <Route element={<ProtectedRoute />}>

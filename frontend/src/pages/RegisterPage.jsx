@@ -94,8 +94,16 @@ const RegisterPage = () => {
         email: formData.email,
         password: formData.password,
       });
+
+      // ── Redirect to OTP verification ───────────────────────────────
+      if (data.requiresVerification) {
+        toast.success("OTP sent to your email! 📧");
+        navigate("/verify-otp", { state: { email: formData.email } });
+        return;
+      }
+
+      // Fallback (shouldn't happen)
       login(data.token, data.user);
-      toast.success(`Account created! Welcome, ${data.user.name} 🎉`);
       navigate("/dashboard");
     } catch (err) {
       const msg = err.response?.data?.message || "Registration failed.";
@@ -169,7 +177,6 @@ const RegisterPage = () => {
               <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">
                 Create your account ✨
               </h2>
-              
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -284,7 +291,36 @@ const RegisterPage = () => {
                   {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-
+              {/* Terms agreement */}
+              <div className="flex items-start gap-2 mb-4">
+                <input
+                  type="checkbox"
+                  id="terms-agree"
+                  required
+                  className="mt-1 w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-300 cursor-pointer"
+                />
+                <label
+                  htmlFor="terms-agree"
+                  className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed"
+                >
+                  I agree to the{" "}
+                  <button
+                    type="button"
+                    onClick={() => window.open("/terms", "_blank")}
+                    className="text-blue-500 hover:underline font-medium"
+                  >
+                    Terms & Conditions
+                  </button>{" "}
+                  and{" "}
+                  <button
+                    type="button"
+                    onClick={() => window.open("/privacy", "_blank")}
+                    className="text-blue-500 hover:underline font-medium"
+                  >
+                    Privacy Policy
+                  </button>
+                </label>
+              </div>
               <Button
                 type="submit"
                 variant="primary"
@@ -302,7 +338,7 @@ const RegisterPage = () => {
               <span className="text-xs text-slate-400">OR</span>
               <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
             </div>
-            
+
             {/* Google Sign In */}
 
             <a

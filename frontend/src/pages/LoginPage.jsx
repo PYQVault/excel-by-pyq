@@ -50,22 +50,39 @@ const LoginPage = () => {
 
   // ── Submit ─────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  e.preventDefault()
+  if (!validate()) return
 
-    setLoading(true);
-    try {
-      const { data } = await api.post("/auth/login", formData);
-      login(data.token, data.user);
-      toast.success(`Welcome back, ${data.user.name}! 👋`);
-      navigate("/dashboard");
-    } catch (err) {
-      const msg = err.response?.data?.message || "Login failed. Try again.";
-      toast.error(msg);
-    } finally {
-      setLoading(false);
+  setLoading(true)
+  try {
+    const { data } = await api.post('/auth/login', formData)
+
+    // ── Unverified user → redirect to OTP ─────────────────────────
+    if (data.requiresVerification) {
+      toast('Please verify your email first 📧')
+      navigate('/verify-otp', { state: { email: formData.email } })
+      return
     }
-  };
+
+    login(data.token, data.user)
+    toast.success(`Welcome back, ${data.user.name}! 👋`)
+    navigate('/dashboard')
+  } catch (err) {
+    const res = err.response?.data
+
+    // ── Check for verification required in error response ──────────
+    if (res?.requiresVerification) {
+      toast('Please verify your email 📧')
+      navigate('/verify-otp', { state: { email: formData.email } })
+      return
+    }
+
+    const msg = res?.message || 'Login failed. Try again.'
+    toast.error(msg)
+  } finally {
+    setLoading(false)
+  }
+}
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
