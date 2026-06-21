@@ -15,7 +15,6 @@ import {
   GraduationCap,
   FlaskConical,
   Layers,
-  Calendar,
   X,
   SlidersHorizontal,
   MessageSquare,
@@ -27,54 +26,52 @@ import Navbar from "@/components/common/Navbar";
 import Button from "@/components/common/Button";
 import Loader from "@/components/common/Loader";
 
-// ── Exam config (add new exams here in future) ─────────────────────────────
+// ── Exam config ────────────────────────────────────────────────────────────
 const EXAM_CONFIG = {
   CUET_UG: {
-    label: "CUET UG",
+    label:    "CUET UG",
     fullName: "Common University Entrance Test (UG)",
-    icon: "🎓",
-    color: "from-blue-500 to-blue-600",
-    lightBg: "bg-blue-50 dark:bg-blue-900/20",
-    border: "border-blue-200 dark:border-blue-700",
-    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+    icon:     "🎓",
+    color:    "from-blue-500 to-blue-600",
+    lightBg:  "bg-blue-50 dark:bg-blue-900/20",
+    border:   "border-blue-200 dark:border-blue-700",
+    badge:    "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+  },
+  
+  UGC_NET: {
+    label:    "UGC NET",
+    fullName: "National Eligibility Test",
+    icon:     "🏛️",
+    color:    "from-emerald-500 to-emerald-600",
+    lightBg:  "bg-emerald-50 dark:bg-emerald-900/20",
+    border:   "border-emerald-200 dark:border-emerald-700",
+    badge:    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
   },
   CUET_PG: {
-    label: "NEET",
+    label:    "NEET",
     fullName: "National Eligibility cum Entrance Test — Undergraduate",
-    icon: "📚",
-    color: "from-purple-500 to-purple-600",
-    lightBg: "bg-purple-50 dark:bg-purple-900/20",
-    border: "border-purple-200 dark:border-purple-700",
-    badge:
-      "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
-  },
-  UGC_NET: {
-    label: "UGC NET",
-    fullName: "National Eligibility Test",
-    icon: "🏛️",
-    color: "from-emerald-500 to-emerald-600",
-    lightBg: "bg-emerald-50 dark:bg-emerald-900/20",
-    border: "border-emerald-200 dark:border-emerald-700",
-    badge:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+    icon:     "📚",
+    color:    "from-purple-500 to-purple-600",
+    lightBg:  "bg-purple-50 dark:bg-purple-900/20",
+    border:   "border-purple-200 dark:border-purple-700",
+    badge:    "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
   },
 };
+
+// ── Exams that go directly to subjects (no stream step) ───────────────────
+const NO_STREAM_EXAMS = ["UGC_NET"];
 
 // ── Stat Card ──────────────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, color, bg }) => (
   <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all duration-200">
-    <div
-      className={`w-10 h-10 sm:w-12 sm:h-12 ${bg} rounded-xl flex items-center justify-center shrink-0`}
-    >
+    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${bg} rounded-xl flex items-center justify-center shrink-0`}>
       <Icon size={18} className={color} />
     </div>
     <div className="min-w-0">
       <p className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white leading-none mb-0.5">
         {value}
       </p>
-      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-        {label}
-      </p>
+      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{label}</p>
     </div>
   </div>
 );
@@ -103,72 +100,56 @@ const Breadcrumb = ({ items, onNavigate }) => (
 // ── Status Badge ───────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   const styles = {
-    in_progress:
-      "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
-    completed:
-      "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
-    not_started:
-      "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
+    in_progress: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
+    completed:   "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
+    not_started: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
   };
   const labels = {
     in_progress: "⏳ In Progress",
-    completed: "✅ Completed",
+    completed:   "✅ Completed",
     not_started: "🚀 Not Started",
   };
   return (
-    <span
-      className={`text-xs font-semibold px-2.5 py-1 rounded-full ${styles[status]}`}
-    >
+    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${styles[status]}`}>
       {labels[status]}
     </span>
   );
 };
 
 // ── Quiz Card ──────────────────────────────────────────────────────────────
-const QuizCard = ({ quiz, attempt, onAction, examKey }) => {
+const QuizCard = ({ quiz, attempt, onAction }) => {
   const status =
-    attempt?.status === 'in_progress' ? 'in_progress'
-    : attempt?.status === 'completed'  ? 'completed'
-    : 'not_started'
+    attempt?.status === "in_progress" ? "in_progress"
+    : attempt?.status === "completed"  ? "completed"
+    : "not_started";
 
   const answeredCount = attempt?.answers
     ? Object.keys(attempt.answers).length
-    : 0
+    : 0;
 
-  // Score in marks (not percentage) — matches new +5/-1 system
-  const totalMarks = attempt?.score ?? null
-  const maxMarks   = (attempt?.totalQuestions ?? 0) * 5
-  const scorePercent = totalMarks !== null && maxMarks > 0
-    ? Math.max(0, Math.round((totalMarks / maxMarks) * 100))
-    : null
+  const totalMarks   = attempt?.score ?? null;
+  const maxMarks     = (attempt?.totalQuestions ?? 0) * (quiz.markingScheme?.correct ?? 5);
+  const scorePercent =
+    totalMarks !== null && maxMarks > 0
+      ? Math.max(0, Math.round((totalMarks / maxMarks) * 100))
+      : null;
 
-  // Year + variant label: "2024", "2024 · A", "2024 · B"
-  const yearLabel = quiz.variant
-    ? `${quiz.year} · ${quiz.variant}`
-    : `${quiz.year}`
+  const yearLabel   = quiz.variant ? `${quiz.year} · ${quiz.variant}` : `${quiz.year}`;
+  const subjectLabel = quiz.subject || "General Aptitude Test";
 
-  // Subject or fallback
-  const subjectLabel = quiz.subject || 'General Aptitude Test'
-
-  // Status bar color
   const barColor =
-    status === 'completed'   ? 'bg-green-500'
-    : status === 'in_progress' ? 'bg-amber-400'
-    : 'bg-blue-500'
+    status === "completed"   ? "bg-green-500"
+    : status === "in_progress" ? "bg-amber-400"
+    : "bg-blue-500";
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all duration-200 overflow-hidden">
-
-      {/* Thin status bar */}
       <div className={`h-1 w-full ${barColor}`} />
-
       <div className="p-5">
 
-        {/* Header row */}
+        {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex-1 min-w-0">
-
-            {/* Year badge + subject */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
                 {yearLabel}
@@ -178,11 +159,10 @@ const QuizCard = ({ quiz, attempt, onAction, examKey }) => {
               </span>
             </div>
           </div>
-
           <StatusBadge status={status} />
         </div>
 
-        {/* Meta row */}
+        {/* Meta */}
         <div className="flex items-center gap-4 text-xs text-slate-400 dark:text-slate-500 mb-4">
           <span className="flex items-center gap-1">
             <BookOpen size={12} />
@@ -194,10 +174,15 @@ const QuizCard = ({ quiz, attempt, onAction, examKey }) => {
               {quiz.timeLimitMinutes} min
             </span>
           )}
+          {quiz.markingScheme && (
+            <span className="flex items-center gap-1 text-emerald-500 dark:text-emerald-400 font-medium">
+              +{quiz.markingScheme.correct} / {quiz.markingScheme.wrong}
+            </span>
+          )}
         </div>
 
         {/* Progress bar — in progress */}
-        {status === 'in_progress' && (
+        {status === "in_progress" && (
           <div className="mb-4">
             <div className="flex justify-between text-xs text-slate-400 mb-1.5">
               <span>Progress</span>
@@ -212,8 +197,8 @@ const QuizCard = ({ quiz, attempt, onAction, examKey }) => {
           </div>
         )}
 
-        {/* Score row — completed */}
-        {status === 'completed' && totalMarks !== null && (
+        {/* Score — completed */}
+        {status === "completed" && totalMarks !== null && (
           <div className="mb-4 flex items-center justify-between bg-slate-50 dark:bg-slate-700/40 rounded-xl px-4 py-3">
             <div>
               <p className="text-xs text-slate-400 mb-0.5">Score</p>
@@ -222,83 +207,77 @@ const QuizCard = ({ quiz, attempt, onAction, examKey }) => {
               </p>
             </div>
             <span className={`text-xl font-black ${
-              scorePercent >= 80 ? 'text-green-500'
-              : scorePercent >= 60 ? 'text-blue-500'
-              : scorePercent >= 40 ? 'text-amber-500'
-              : 'text-red-500'
+              scorePercent >= 80 ? "text-green-500"
+              : scorePercent >= 60 ? "text-blue-500"
+              : scorePercent >= 40 ? "text-amber-500"
+              : "text-red-500"
             }`}>
               {scorePercent}%
             </span>
           </div>
         )}
 
-        {/* Action buttons */}
+        {/* Actions */}
         <div className="flex gap-2 mt-1">
-          {status === 'not_started' && (
+          {status === "not_started" && (
             <Button variant="primary" size="sm" className="flex-1"
-              onClick={() => onAction(quiz._id, 'start')}>
+              onClick={() => onAction(quiz._id, "start")}>
               <PlayCircle size={14} /> Start Quiz
             </Button>
           )}
-
-          {status === 'in_progress' && (
+          {status === "in_progress" && (
             <>
               <Button variant="primary" size="sm" className="flex-1"
-                onClick={() => onAction(quiz._id, 'continue')}>
+                onClick={() => onAction(quiz._id, "continue")}>
                 <PlayCircle size={14} /> Continue
               </Button>
               <Button variant="ghost" size="sm"
-                onClick={() => onAction(quiz._id, 'restart', attempt._id)}
+                onClick={() => onAction(quiz._id, "restart", attempt._id)}
                 title="Restart">
                 <RotateCcw size={13} />
               </Button>
             </>
           )}
-
-          {status === 'completed' && (
+          {status === "completed" && (
             <>
               <Button variant="secondary" size="sm" className="flex-1"
-                onClick={() => onAction(quiz._id, 'results', attempt._id)}>
+                onClick={() => onAction(quiz._id, "results", attempt._id)}>
                 <Trophy size={14} /> View Results
               </Button>
               <Button variant="ghost" size="sm"
-                onClick={() => onAction(quiz._id, 'restart', attempt._id)}
+                onClick={() => onAction(quiz._id, "restart", attempt._id)}
                 title="Retake">
                 <RotateCcw size={13} />
               </Button>
             </>
           )}
         </div>
-
       </div>
     </div>
-  )
-}
+  );
+};
 
 // ── MAIN DASHBOARD ─────────────────────────────────────────────────────────
 const DashboardPage = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const navigate    = useNavigate();
+  const { user }   = useAuth();
 
-  // Drill-down state
-  const [view, setView] = useState("home"); // home | stream | subject | quizzes
-  const [selectedExam, setSelectedExam] = useState(null);
-  const [selectedStream, setSelectedStream] = useState(null);
+  const [view, setView]                   = useState("home");
+  const [selectedExam, setSelectedExam]   = useState(null);
+  const [selectedStream, setSelectedStream] = useState(null); // null = not set, '' = UGC NET (no stream)
   const [selectedSubject, setSelectedSubject] = useState(null);
 
-  // Data
-  const [meta, setMeta] = useState({}); // full exam→stream→subject tree
-  const [quizzes, setQuizzes] = useState([]);
+  const [meta, setMeta]         = useState({});
+  const [quizzes, setQuizzes]   = useState([]);
   const [attempts, setAttempts] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
   const [quizLoading, setQuizLoading] = useState(false);
 
-  // Search
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen]       = useState(false);
+  const [searchQuery, setSearchQuery]     = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  // ── Fetch meta tree + attempts on mount ─────────────────────────────
+  // ── Fetch meta + attempts ────────────────────────────────────────────
   useEffect(() => {
     const init = async () => {
       try {
@@ -323,20 +302,22 @@ const DashboardPage = () => {
     init();
   }, []);
 
-  // ── Fetch quizzes when subject selected ─────────────────────────────
+  // ── Fetch quizzes ────────────────────────────────────────────────────
   useEffect(() => {
     if (view !== "quizzes" || !selectedExam) return;
 
     const fetchQuizzes = async () => {
       setQuizLoading(true);
       try {
-        const params = {
-          exam: selectedExam,
-          stream: selectedStream,
-        };
+        const params = { exam: selectedExam };
 
-        // Only add subject param if it's a real subject
-        if (selectedSubject && selectedSubject !== "General Aptitude") {
+        // Only send stream if it's a real value (not empty / UGC NET)
+        if (selectedStream && selectedStream !== "__no_stream__") {
+          params.stream = selectedStream;
+        }
+
+        // Only send subject if it's real
+        if (selectedSubject && selectedSubject !== "__none__") {
           params.subject = selectedSubject;
         }
 
@@ -354,15 +335,10 @@ const DashboardPage = () => {
 
   // ── Search ───────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
+    if (!searchQuery.trim()) { setSearchResults([]); return; }
     const search = async () => {
       try {
-        const { data } = await api.get("/quizzes", {
-          params: { search: searchQuery },
-        });
+        const { data } = await api.get("/quizzes", { params: { search: searchQuery } });
         setSearchResults(data.data || []);
       } catch {
         setSearchResults([]);
@@ -375,77 +351,115 @@ const DashboardPage = () => {
   // ── Stats ────────────────────────────────────────────────────────────
   const allAttempts = Object.values(attempts);
   const stats = {
-    completed: allAttempts.filter((a) => a.status === "completed").length,
+    completed:  allAttempts.filter((a) => a.status === "completed").length,
     inProgress: allAttempts.filter((a) => a.status === "in_progress").length,
     avgScore: (() => {
       const done = allAttempts.filter((a) => a.status === "completed");
       if (!done.length) return "—";
-      const avg =
-        done.reduce(
-          (s, a) => s + Math.round((a.score / a.totalQuestions) * 100),
-          0,
-        ) / done.length;
+      const avg = done.reduce((s, a) => s + Math.round((a.score / a.totalQuestions) * 100), 0) / done.length;
       return `${Math.round(avg)}%`;
     })(),
     totalExams: Object.keys(meta).length,
   };
 
-  // ── Navigation ───────────────────────────────────────────────────────
+  // ── Helpers ──────────────────────────────────────────────────────────
+  const isNoStreamExam = (examKey) => NO_STREAM_EXAMS.includes(examKey);
+
+  // Get subjects map for current exam+stream
+  const getSubjects = () => {
+    if (!selectedExam) return {};
+    const examData = meta[selectedExam] || {};
+
+    // UGC NET stores subjects under '' key
+    if (isNoStreamExam(selectedExam)) {
+      return examData[""] || examData[selectedStream] || {};
+    }
+    return examData[selectedStream] || {};
+  };
+
+  // ── Breadcrumbs ──────────────────────────────────────────────────────
+  const breadcrumbs = ["Home"];
+  if (selectedExam) breadcrumbs.push(EXAM_CONFIG[selectedExam]?.label || selectedExam);
+  // Only show stream in breadcrumb if it's real (not empty / UGC NET)
+  if (selectedStream && !isNoStreamExam(selectedExam)) breadcrumbs.push(selectedStream);
+  if (selectedSubject && selectedSubject !== "__none__") breadcrumbs.push(selectedSubject);
+
+  // ── Breadcrumb navigation ────────────────────────────────────────────
   const handleBreadcrumb = (index) => {
     if (index === 0) {
       setView("home");
       setSelectedExam(null);
       setSelectedStream(null);
       setSelectedSubject(null);
+      return;
     }
     if (index === 1) {
-      setView("stream");
-      setSelectedStream(null);
+      // UGC NET → home (no stream view)
+      if (selectedExam && isNoStreamExam(selectedExam)) {
+        setView("home");
+        setSelectedExam(null);
+        setSelectedStream(null);
+      } else {
+        setView("stream");
+        setSelectedStream(null);
+      }
       setSelectedSubject(null);
+      return;
     }
     if (index === 2) {
       setView("subject");
       setSelectedSubject(null);
+      return;
+    }
+    if (index === 3) {
+      setView("quizzes");
+      return;
     }
   };
 
-  const handleAction = async (quizId, action, attemptId) => {
-  if (action === 'results') {
-    navigate(`/results/${attemptId}`)
-    return
-  }
+  // ── Exam card click ──────────────────────────────────────────────────
+  const handleExamClick = (key, examData) => {
+    if (!examData) { toast("No papers available yet for this exam"); return; }
 
-  if (action === 'restart') {
-    const existing = attempts[quizId]
-    if (existing && (existing.status === 'in_progress' || existing.status === 'completed')) {
-      try {
-        await api.post(`/attempts/${existing._id}/abandon`)
-        setAttempts((prev) => {
-          const copy = { ...prev }
-          delete copy[quizId]
-          return copy
-        })
-      } catch {
-        toast.error('Could not restart. Try again.')
-        return
-      }
+    setSelectedExam(key);
+
+    if (isNoStreamExam(key)) {
+      // UGC NET → skip stream → go straight to subjects
+      setSelectedStream("");   // empty string matches DB key
+      setView("subject");
+    } else {
+      setView("stream");
     }
-    // ── Pass fresh:true so QuizPage skips resume modal ──────────────
-    navigate(`/quiz/${quizId}`, { state: { fresh: true } })
-    return
-  }
+  };
 
-  navigate(`/quiz/${quizId}`)
-}
+  // ── Action handler ───────────────────────────────────────────────────
+  const handleAction = async (quizId, action, attemptId) => {
+    if (action === "results") {
+      navigate(`/results/${attemptId}`);
+      return;
+    }
 
-  // ── Breadcrumb items ─────────────────────────────────────────────────
-  const breadcrumbs = ["Home"];
-  if (selectedExam)
-    breadcrumbs.push(EXAM_CONFIG[selectedExam]?.label || selectedExam);
-  if (selectedStream) breadcrumbs.push(selectedStream);
-  if (selectedSubject && selectedSubject !== "General Aptitude") {
-    breadcrumbs.push(selectedSubject);
-  }
+    if (action === "restart") {
+      const existing = attempts[quizId];
+      if (existing && (existing.status === "in_progress" || existing.status === "completed")) {
+        try {
+          await api.post(`/attempts/${existing._id}/abandon`);
+          setAttempts((prev) => {
+            const copy = { ...prev };
+            delete copy[quizId];
+            return copy;
+          });
+        } catch {
+          toast.error("Could not restart. Try again.");
+          return;
+        }
+      }
+      navigate(`/quiz/${quizId}`, { state: { fresh: true } });
+      return;
+    }
+
+    navigate(`/quiz/${quizId}`);
+  };
 
   if (loading) return <Loader text="Loading your dashboard..." />;
 
@@ -454,10 +468,11 @@ const DashboardPage = () => {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* ── Welcome + Stats ─────────────────────────────────────────── */}
+
+        {/* ── HOME VIEW ──────────────────────────────────────────────── */}
         {view === "home" && (
           <>
-            {/* Welcome Header */}
+            {/* Welcome */}
             <div className="flex flex-col gap-4 mb-6 sm:mb-8">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -477,136 +492,67 @@ const DashboardPage = () => {
                 </div>
               </div>
 
-              {/* Search trigger — full width on mobile */}
               <button
                 onClick={() => setSearchOpen(true)}
                 className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-400 hover:border-blue-300 hover:text-blue-500 transition-all shadow-sm w-full sm:w-72 sm:self-end"
               >
                 <Search size={15} />
                 <span className="flex-1 text-left">Search quizzes...</span>
-                <kbd className="text-xs bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded font-mono hidden sm:block">
-                  /
-                </kbd>
+                <kbd className="text-xs bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded font-mono hidden sm:block">/</kbd>
               </button>
             </div>
 
-            {/* Stats — 2 cols on mobile, 4 on desktop */}
+            {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-10">
-              <StatCard
-                icon={GraduationCap}
-                label="Exams"
-                value={stats.totalExams || "—"}
-                color="text-blue-500"
-                bg="bg-blue-50 dark:bg-blue-900/30"
-              />
-              <StatCard
-                icon={CheckCircle2}
-                label="Completed"
-                value={stats.completed}
-                color="text-green-500"
-                bg="bg-green-50 dark:bg-green-900/30"
-              />
-              <StatCard
-                icon={TrendingUp}
-                label="In Progress"
-                value={stats.inProgress}
-                color="text-amber-500"
-                bg="bg-amber-50 dark:bg-amber-900/30"
-              />
-              <StatCard
-                icon={Target}
-                label="Avg. Score"
-                value={stats.avgScore}
-                color="text-purple-500"
-                bg="bg-purple-50 dark:bg-purple-900/30"
-              />
+              <StatCard icon={GraduationCap} label="Exams" value={stats.totalExams || "—"} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-900/30" />
+              <StatCard icon={CheckCircle2} label="Completed" value={stats.completed} color="text-green-500" bg="bg-green-50 dark:bg-green-900/30" />
+              <StatCard icon={TrendingUp} label="In Progress" value={stats.inProgress} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-900/30" />
+              <StatCard icon={Target} label="Avg. Score" value={stats.avgScore} color="text-purple-500" bg="bg-purple-50 dark:bg-purple-900/30" />
             </div>
 
-            {/* Exam Selector */}
+            {/* Exam selector */}
             <div className="mb-4">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-1">
-                Select Your Exam
-              </h2>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-1">Select Your Exam</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
                 Choose an exam to browse previous year papers
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {Object.entries(EXAM_CONFIG).map(([key, cfg]) => {
-                  const examData = meta[key];
-                  const streamCount = examData
-                    ? Object.keys(examData).length
-                    : 0;
+                  const examData     = meta[key];
                   const subjectCount = examData
-                    ? Object.values(examData).reduce(
-                        (s, streams) => s + Object.keys(streams).length,
-                        0,
-                      )
+                    ? Object.values(examData).reduce((s, streams) => s + Object.keys(streams).length, 0)
                     : 0;
                   const quizCount = examData
                     ? Object.values(examData).reduce(
-                        (s, streams) =>
-                          s +
-                          Object.values(streams).reduce(
-                            (ss, subjects) => ss + subjects.length,
-                            0,
-                          ),
-                        0,
+                        (s, streams) => s + Object.values(streams).reduce((ss, subjects) => ss + subjects.length, 0), 0
                       )
                     : 0;
 
                   return (
                     <button
                       key={key}
-                      onClick={() => {
-                        if (!examData) {
-                          toast("No papers available yet for this exam");
-                          return;
-                        }
-                        setSelectedExam(key);
-                        setView("stream");
-                      }}
+                      onClick={() => handleExamClick(key, examData)}
                       className={`group relative text-left p-6 rounded-2xl border-2 transition-all duration-300
                         bg-white dark:bg-slate-800 hover:shadow-xl
-                        ${
-                          examData
-                            ? `${cfg.border} hover:border-blue-400 cursor-pointer`
-                            : "border-slate-100 dark:border-slate-700 opacity-60 cursor-not-allowed"
+                        ${examData
+                          ? `${cfg.border} hover:border-blue-400 cursor-pointer`
+                          : "border-slate-100 dark:border-slate-700 opacity-60 cursor-not-allowed"
                         }`}
                     >
-                      {/* Gradient blob */}
-                      <div
-                        className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${cfg.color} opacity-10 rounded-2xl`}
-                      />
-
+                      <div className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${cfg.color} opacity-10 rounded-2xl`} />
                       <div className="relative z-10">
                         <div className="text-4xl mb-3">{cfg.icon}</div>
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">
-                          {cfg.label}
-                        </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                          {cfg.fullName}
-                        </p>
-
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">{cfg.label}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">{cfg.fullName}</p>
                         {examData ? (
                           <div className="flex items-center gap-3 text-xs">
-                            <span
-                              className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}
-                            >
-                              {subjectCount} Subjects
-                            </span>
-                            <span
-                              className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}
-                            >
-                              {quizCount} Papers
-                            </span>
+                            <span className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}>{subjectCount} Subjects</span>
+                            <span className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}>{quizCount} Papers</span>
                           </div>
                         ) : (
-                          <span className="text-xs text-slate-400">
-                            Coming soon
-                          </span>
+                          <span className="text-xs text-slate-400">Coming soon</span>
                         )}
-
                         {examData && (
                           <div className="mt-4 flex items-center gap-1 text-blue-500 text-xs font-semibold group-hover:gap-2 transition-all">
                             Browse papers <ChevronRight size={14} />
@@ -621,190 +567,148 @@ const DashboardPage = () => {
           </>
         )}
 
-        {/* ── Stream View ─────────────────────────────────────────────── */}
+        {/* ── STREAM VIEW (CUET UG / CUET PG only) ──────────────────── */}
         {view === "stream" && selectedExam && (
           <>
             <div className="flex items-center gap-3 mb-6">
               <button
-                onClick={() => {
-                  setView("home");
-                  setSelectedExam(null);
-                }}
+                onClick={() => { setView("home"); setSelectedExam(null); setSelectedStream(null); }}
                 className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-colors shadow-sm"
               >
-                <ChevronLeft
-                  size={18}
-                  className="text-slate-600 dark:text-slate-300"
-                />
+                <ChevronLeft size={18} className="text-slate-600 dark:text-slate-300" />
               </button>
               <div>
                 <Breadcrumb items={breadcrumbs} onNavigate={handleBreadcrumb} />
-                <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
-                  Select Section
-                </h2>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">Select Section</h2>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(meta[selectedExam] || {}).map(
-                ([stream, subjects]) => {
-                  const subjectCount = Object.keys(subjects).length;
-                  const quizCount = Object.values(subjects).reduce(
-                    (s, q) => s + q.length,
-                    0,
-                  );
-                  const cfg = EXAM_CONFIG[selectedExam];
+              {Object.entries(meta[selectedExam] || {}).map(([stream, subjects]) => {
+                const cfg          = EXAM_CONFIG[selectedExam];
+                const subjectKeys  = Object.keys(subjects);
+                const subjectCount = subjectKeys.length;
+                const quizCount    = Object.values(subjects).reduce((s, q) => s + q.length, 0);
 
-                  return (
-                    <button
-                      key={stream}
-                      onClick={() => {
-                        setSelectedStream(stream);
-                        const subjects = meta[selectedExam][stream];
-                        const subjectKeys = Object.keys(subjects);
-
-                        // If only key is 'General Aptitude' → no subjects → go straight to quizzes
-                        if (
-                          subjectKeys.length === 1 &&
-                          subjectKeys[0] === "General Aptitude"
-                        ) {
-                          setSelectedSubject("General Aptitude");
-                          setView("quizzes");
-                        } else {
-                          setView("subject");
-                        }
-                      }}
-                      className="group text-left p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300"
-                    >
-                      <div
-                        className={`w-10 h-10 bg-linear-to-br ${cfg.color} rounded-xl flex items-center justify-center mb-3`}
-                      >
-                        <Layers size={18} className="text-white" />
-                      </div>
-                      <h3 className="font-bold text-slate-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {stream}
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-                        {subjectCount} subject{subjectCount !== 1 ? "s" : ""} ·{" "}
-                        {quizCount} paper{quizCount !== 1 ? "s" : ""}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {Object.keys(subjects)
-                          .slice(0, 3)
-                          .map((sub) => (
-                            <span
-                              key={sub}
-                              className={`text-xs px-2 py-0.5 rounded-md font-medium ${cfg.badge}`}
-                            >
-                              {sub}
-                            </span>
-                          ))}
-                        {Object.keys(subjects).length > 3 && (
-                          <span className="text-xs px-2 py-0.5 rounded-md font-medium bg-slate-100 dark:bg-slate-700 text-slate-500">
-                            +{Object.keys(subjects).length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                },
-              )}
+                return (
+                  <button
+                    key={stream}
+                    onClick={() => {
+                      setSelectedStream(stream);
+                      // If only General Aptitude → skip to quizzes
+                      if (subjectKeys.length === 1 && subjectKeys[0] === "General Aptitude") {
+                        setSelectedSubject("General Aptitude");
+                        setView("quizzes");
+                      } else {
+                        setView("subject");
+                      }
+                    }}
+                    className="group text-left p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300"
+                  >
+                    <div className={`w-10 h-10 bg-linear-to-br ${cfg.color} rounded-xl flex items-center justify-center mb-3`}>
+                      <Layers size={18} className="text-white" />
+                    </div>
+                    <h3 className="font-bold text-slate-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {stream}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                      {subjectCount} subject{subjectCount !== 1 ? "s" : ""} · {quizCount} paper{quizCount !== 1 ? "s" : ""}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {subjectKeys.slice(0, 3).map((sub) => (
+                        <span key={sub} className={`text-xs px-2 py-0.5 rounded-md font-medium ${cfg.badge}`}>{sub}</span>
+                      ))}
+                      {subjectKeys.length > 3 && (
+                        <span className="text-xs px-2 py-0.5 rounded-md font-medium bg-slate-100 dark:bg-slate-700 text-slate-500">
+                          +{subjectKeys.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </>
         )}
 
-        {/* ── Subject View ─────────────────────────────────────────────── */}
-        {view === "subject" && selectedStream && (
+        {/* ── SUBJECT VIEW ───────────────────────────────────────────── */}
+        {view === "subject" && selectedExam && (
           <>
             <div className="flex items-center gap-3 mb-6">
               <button
                 onClick={() => {
-                  setView("stream");
-                  setSelectedStream(null);
+                  if (isNoStreamExam(selectedExam)) {
+                    // UGC NET → back to home
+                    setView("home");
+                    setSelectedExam(null);
+                    setSelectedStream(null);
+                  } else {
+                    setView("stream");
+                    setSelectedStream(null);
+                  }
+                  setSelectedSubject(null);
                 }}
                 className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-colors shadow-sm"
               >
-                <ChevronLeft
-                  size={18}
-                  className="text-slate-600 dark:text-slate-300"
-                />
+                <ChevronLeft size={18} className="text-slate-600 dark:text-slate-300" />
               </button>
               <div>
                 <Breadcrumb items={breadcrumbs} onNavigate={handleBreadcrumb} />
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
-                  Select Domain Specific Subject
+                  {isNoStreamExam(selectedExam) ? "Select Subject" : "Select Domain Specific Subject"}
                 </h2>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {Object.entries(meta[selectedExam]?.[selectedStream] || {}).map(
-                ([subjectKey, papers]) => {
-                  const cfg = EXAM_CONFIG[selectedExam];
-                  const displayName =
-                    subjectKey === "General Aptitude" ? selectedStream : subjectKey;
+              {Object.entries(getSubjects()).map(([subjectKey, papers]) => {
+                const cfg         = EXAM_CONFIG[selectedExam];
+                const displayName = subjectKey === "__none__" ? "General Aptitude Test" : subjectKey;
 
-                  return (
-                    <button
-                      key={subjectKey}
-                      onClick={() => {
-                        setSelectedSubject(subjectKey);
-                        setView("quizzes");
-                      }}
-                      className="group text-left p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300"
-                    >
-                      <div
-                        className={`w-10 h-10 ${cfg.lightBg} rounded-xl flex items-center justify-center mb-3`}
-                      >
-                        <FlaskConical size={18} className="text-blue-500" />
+                return (
+                  <button
+                    key={subjectKey}
+                    onClick={() => { setSelectedSubject(subjectKey); setView("quizzes"); }}
+                    className="group text-left p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300"
+                  >
+                    <div className={`w-10 h-10 ${cfg.lightBg} rounded-xl flex items-center justify-center mb-3`}>
+                      <FlaskConical size={18} className="text-blue-500" />
+                    </div>
+                    <h3 className="font-bold text-slate-700 dark:text-white text-sm leading-snug mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {displayName}
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-400">
+                        {papers.length} paper{papers.length !== 1 ? "s" : ""}
+                      </span>
+                      <div className="flex gap-1 flex-wrap">
+                        {papers.slice(0, 3).map((p) => (
+                          <span key={p._id || p.year} className={`text-xs px-1.5 py-0.5 rounded font-semibold ${cfg.badge}`}>
+                            {p.year}
+                          </span>
+                        ))}
                       </div>
-                      <h3 className="font-bold text-slate-700 dark:text-white text-sm leading-snug mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {displayName}
-                      </h3>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-slate-400">
-                          {papers.length} paper{papers.length !== 1 ? "s" : ""}
-                        </span>
-                        <div className="flex gap-1">
-                          {papers.slice(0, 3).map((p) => (
-                            <span
-                              key={p.year}
-                              className={`text-xs px-1.5 py-0.5 rounded font-semibold ${cfg.badge}`}
-                            >
-                              {p.year}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                },
-              )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </>
         )}
 
-        {/* ── Quizzes View ─────────────────────────────────────────────── */}
+        {/* ── QUIZZES VIEW ───────────────────────────────────────────── */}
         {view === "quizzes" && selectedSubject && (
           <>
             <div className="flex items-center gap-3 mb-6">
               <button
-                onClick={() => {
-                  setView("subject");
-                  setSelectedSubject(null);
-                }}
+                onClick={() => { setView("subject"); setSelectedSubject(null); }}
                 className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-colors shadow-sm"
               >
-                <ChevronLeft
-                  size={18}
-                  className="text-slate-600 dark:text-slate-300"
-                />
+                <ChevronLeft size={18} className="text-slate-600 dark:text-slate-300" />
               </button>
               <div>
                 <Breadcrumb items={breadcrumbs} onNavigate={handleBreadcrumb} />
-                <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
-                  Previous Year Papers
-                </h2>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">Previous Year Papers</h2>
               </div>
             </div>
 
@@ -815,24 +719,19 @@ const DashboardPage = () => {
             ) : quizzes.length === 0 ? (
               <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                 <div className="text-5xl mb-3">📭</div>
-                <h3 className="font-semibold text-slate-600 dark:text-slate-400">
-                  No papers yet
-                </h3>
-                <p className="text-sm text-slate-400 mt-1">
-                  Papers for this subject will be added soon!
-                </p>
+                <h3 className="font-semibold text-slate-600 dark:text-slate-400">No papers yet</h3>
+                <p className="text-sm text-slate-400 mt-1">Papers for this subject will be added soon!</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 {quizzes
-                  .sort((a, b) => b.year - a.year)
+                  .sort((a, b) => b.year - a.year || (a.variant || "").localeCompare(b.variant || ""))
                   .map((quiz) => (
                     <QuizCard
                       key={quiz._id}
                       quiz={quiz}
                       attempt={attempts[quiz._id] || null}
                       onAction={handleAction}
-                      examKey={selectedExam}
                     />
                   ))}
               </div>
@@ -840,9 +739,10 @@ const DashboardPage = () => {
           </>
         )}
 
+        {/* Footer */}
         <div className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700/50 text-center">
           <p className="text-sm text-slate-400 dark:text-slate-500 mb-3">
-             Have a suggestion? We'd love to hear from you.
+            Have a suggestion? We'd love to hear from you.
           </p>
           <button
             onClick={() => navigate("/feedback")}
@@ -854,16 +754,14 @@ const DashboardPage = () => {
         </div>
       </main>
 
-      {/* ── Search Modal ─────────────────────────────────────────────────── */}
+      {/* ── SEARCH MODAL ───────────────────────────────────────────────── */}
       {searchOpen && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20 px-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setSearchOpen(false);
-          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setSearchOpen(false); }}
         >
           <div className="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-            {/* Search input */}
+
             <div className="flex items-center gap-3 p-4 border-b border-slate-100 dark:border-slate-700">
               <Search size={18} className="text-slate-400 shrink-0" />
               <input
@@ -875,22 +773,17 @@ const DashboardPage = () => {
                 className="flex-1 bg-transparent text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none text-sm"
               />
               <button onClick={() => setSearchOpen(false)}>
-                <X
-                  size={18}
-                  className="text-slate-400 hover:text-slate-600 transition-colors"
-                />
+                <X size={18} className="text-slate-400 hover:text-slate-600 transition-colors" />
               </button>
             </div>
 
-            {/* Tags suggestion */}
             {!searchQuery && (
               <div className="p-4">
-                <p className="text-xs text-slate-400 mb-3 font-medium uppercase tracking-wide">
-                  Quick Filters
-                </p>
+                <p className="text-xs text-slate-400 mb-3 font-medium uppercase tracking-wide">Quick Filters</p>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: "CUET UG ", q: "CUET" },
+                    { label: "CUET UG",     q: "CUET" },
+                    { label: "UGC NET",     q: "UGC NET" },
                     { label: "2022 Papers", q: "2022" },
                     { label: "2023 Papers", q: "2023" },
                     { label: "2024 Papers", q: "2024" },
@@ -909,7 +802,6 @@ const DashboardPage = () => {
               </div>
             )}
 
-            {/* Search results */}
             {searchQuery && (
               <div className="max-h-80 overflow-y-auto">
                 {searchResults.length === 0 ? (
@@ -923,34 +815,24 @@ const DashboardPage = () => {
                       return (
                         <button
                           key={quiz._id}
-                          onClick={() => {
-                            setSearchOpen(false);
-                            navigate(`/quiz/${quiz._id}`);
-                          }}
+                          onClick={() => { setSearchOpen(false); navigate(`/quiz/${quiz._id}`); }}
                           className="w-full text-left flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
                         >
-                          <div
-                            className={`w-9 h-9 bg-linear-to-br ${cfg?.color || "from-blue-500 to-blue-600"} rounded-lg flex items-center justify-center shrink-0 text-sm`}
-                          >
+                          <div className={`w-9 h-9 bg-linear-to-br ${cfg?.color || "from-blue-500 to-blue-600"} rounded-lg flex items-center justify-center shrink-0 text-sm`}>
                             {cfg?.icon || "📄"}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-slate-800 dark:text-white text-sm truncate">
-                              {quiz.title}
-                            </p>
+                            <p className="font-semibold text-slate-800 dark:text-white text-sm truncate">{quiz.title}</p>
                             <p className="text-xs text-slate-400 mt-0.5">
-                              {quiz.exam?.replace("_", " ")} · {quiz.stream} ·{" "}
-                              {quiz.subject} · {quiz.year}
+                              {quiz.exam?.replace(/_/g, " ")}
+                              {quiz.subject ? ` · ${quiz.subject}` : ""}
+                              {quiz.year ? ` · ${quiz.year}` : ""}
+                              {quiz.variant ? ` · ${quiz.variant}` : ""}
                             </p>
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0">
-                            <span className="text-xs text-slate-400">
-                              {quiz.questionCount} Qs
-                            </span>
-                            <ChevronRight
-                              size={14}
-                              className="text-slate-300"
-                            />
+                            <span className="text-xs text-slate-400">{quiz.questionCount} Qs</span>
+                            <ChevronRight size={14} className="text-slate-300" />
                           </div>
                         </button>
                       );

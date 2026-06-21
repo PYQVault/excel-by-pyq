@@ -4,24 +4,40 @@ const Quiz     = require('../models/Quiz')
 // ── GET /api/quizzes/meta ─────────────────────────────────────────────────
 const getQuizMeta = async (req, res, next) => {
   try {
-    const quizzes = await Quiz.find({ isPublished: true })
-      .select('exam stream subject year title _id')
-      .lean()
+    const pipeline = [
+      { $match: { isPublished: true } },
+      {
+        $group: {
+          _id: {
+            exam:    '$exam',
+            stream:  '$stream',
+            subject: '$subject',
+          },
+          ids: {
+            $push: {
+              _id:     '$_id',
+              title:   '$title',
+              year:    '$year',
+              variant: '$variant',
+            },
+          },
+        },
+      },
+    ]
+
+    const results = await Quiz.aggregate(pipeline)
 
     const tree = {}
+    results.forEach(({ _id, ids }) => {
+      const { exam, stream, subject } = _id
+      if (!tree[exam]) tree[exam] = {}
 
-    quizzes.forEach(({ exam, stream, subject, year, title, _id }) => {
-      if (!tree[exam])         tree[exam] = {}
-      if (!tree[exam][stream]) tree[exam][stream] = {}
+      // ── Use actual stream value — empty string for UGC NET ────────
+      const streamKey  = stream?.trim()  || ''
+      const subjectKey = subject?.trim() || '__none__'
 
-      // ── Key fix: use 'General Aptitude' for streams with no subject ──
-      // General Aptitude papers have no subject — group under special key
-      const subjectKey = subject?.trim() || 'General Aptitude'
-
-      if (!tree[exam][stream][subjectKey]) {
-        tree[exam][stream][subjectKey] = []
-      }
-      tree[exam][stream][subjectKey].push({ _id, title, year })
+      if (!tree[exam][streamKey])         tree[exam][streamKey] = {}
+      tree[exam][streamKey][subjectKey] = ids
     })
 
     res.status(200).json({ success: true, data: tree })
@@ -33,14 +49,18 @@ const getQuizMeta = async (req, res, next) => {
 // ── GET /api/quizzes ──────────────────────────────────────────────────────
 const getAllQuizzes = async (req, res, next) => {
   try {
-    const page  = parseInt(req.query.page)  || 1
-    const limit = parseInt(req.query.limit) || 20
-    const skip  = (page - 1) * limit
-
     const filter = { isPublished: true }
-    if (req.query.exam)    filter.exam    = req.query.exam
-    if (req.query.stream)  filter.stream  = req.query.stream
-    if (req.query.subject) filter.subject = req.query.subject
+
+    if (req.query.exam) filter.exam = req.query.exam
+
+    // ── Only add stream filter if it's a real stream ───────────────
+    if (req.query.stream && req.query.stream !== '__no_stream__') {
+      filter.stream = req.query.stream
+    }
+
+    if (req.query.subject && req.query.subject !== '__none__') {
+      filter.subject = req.query.subject
+    }
 
     if (req.query.search) {
       const words = req.query.search.trim().split(/\s+/).filter(Boolean)
@@ -55,29 +75,17 @@ const getAllQuizzes = async (req, res, next) => {
       })
     }
 
-    const [quizzes, total] = await Promise.all([
-      Quiz.find(filter)
-        .select('title description exam stream subject year timeLimitMinutes questions createdAt')
-        .sort({ year: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Quiz.countDocuments(filter),
-    ])
+    const quizzes = await Quiz.find(filter)
+      .select('title description exam stream subject year variant timeLimitMinutes questions createdAt markingScheme')
+      .sort({ year: -1, variant: 1 })
+      .lean()
 
     const data = quizzes.map((q) => ({
       ...q,
       questionCount: q.questions.length,
     }))
 
-    res.status(200).json({
-      success: true,
-      count: data.length,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-      data,
-    })
+    res.status(200).json({ success: true, count: data.length, data })
   } catch (error) {
     next(error)
   }

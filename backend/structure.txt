@@ -112,3 +112,10 @@ node scripts/importQuiz.js \
   --subject="Chemistry" \
   --year=2023 \
   --title="CUET UG 2023 - Chemistry"
+
+  ................... AFTER 21 June ..UGC NET ..................
+  .........New import scripts for bothe CUET and NET............
+
+  node scripts/importQuiz.js --file="FORENSIC_2025_JUNE.xlsx" --exam="UGC_NET" --subject="Forensic Science" --year=2025 --variant="June" --markingCorrect=2 --markingWrong=0  --title="UGC NET 2025 June - Forensic Science"
+
+  node scripts/importQuiz.js --file="FORENSIC_2025_JUNE.xlsx" --exam="UGC_NET" --subject="Forensic Science" --year=2025 --variant="June" --markingCorrect=2  --markingWrong=0 --title="UGC NET 2025 June - Forensic Science"

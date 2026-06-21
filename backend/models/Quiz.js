@@ -1,34 +1,40 @@
 const mongoose = require('mongoose')
 
+const MarkingSchemeSchema = new mongoose.Schema({
+  correct:     { type: Number, default: 5 },
+  wrong:       { type: Number, default: -1 },
+  unattempted: { type: Number, default: 0  },
+}, { _id: false })
+
 const QuizSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true,
-  },
+  title:       { type: String, required: true, trim: true },
   description: { type: String, default: '' },
   exam: {
     type: String,
     required: true,
     enum: ['CUET_UG', 'CUET_PG', 'UGC_NET'],
   },
-  stream:  { type: String, required: true, trim: true },
+
+  // ── UGC NET has no stream — goes straight to subject ──────────────
+  stream:  { type: String, trim: true, default: '' },
   subject: { type: String, trim: true, default: '' },
+
   year:    { type: Number, required: true },
 
-  // ── NEW: For multiple papers in same year ─────────────────────────
-  // Examples: 'A', 'B', 'Morning', 'Evening', 'Shift 1', 'Shift 2'
-  // Empty string means only one paper that year
-  variant: {
-    type: String,
-    trim: true,
-    default: '',
+  // ── Variant — A/B/C for CUET, June/December for UGC NET ──────────
+  variant: { type: String, trim: true, default: '' },
+
+  // ── Marking scheme per quiz ────────────────────────────────────────
+  markingScheme: {
+    type:    MarkingSchemeSchema,
+    default: () => ({ correct: 5, wrong: -1, unattempted: 0 }),
   },
 
   questions:        [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
   timeLimitMinutes: { type: Number, default: 0 },
   isPublished:      { type: Boolean, default: true },
   createdBy:        { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
 }, { timestamps: true })
 
 QuizSchema.index({ exam: 1, stream: 1, subject: 1, isPublished: 1 })

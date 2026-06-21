@@ -91,7 +91,7 @@ const saveAnswer = async (req, res, next) => {
 
     const quiz = await Quiz.findById(attempt.quizId).populate({
       path:   'questions',
-      select: 'correctOptionIndex',
+      select: 'correctOptionIndex isGrace',
     })
 
     const question = quiz.questions.find(
@@ -103,7 +103,9 @@ const saveAnswer = async (req, res, next) => {
       return next(new Error('Question not found in this quiz'))
     }
 
-    const isCorrect = question.correctOptionIndex === selectedOptionIndex
+    const isCorrect = question.isGrace
+      ? true
+      : question.correctOptionIndex === selectedOptionIndex
 
     attempt.answers.set(questionId, {
       questionId,
@@ -120,6 +122,7 @@ const saveAnswer = async (req, res, next) => {
       data: {
         isCorrect,
         correctOptionIndex: question.correctOptionIndex,
+        isGrace:            question.isGrace || false,
       },
     })
   } catch (error) {
@@ -143,50 +146,44 @@ const submitAttempt = async (req, res, next) => {
       return next(new Error('Active attempt not found'))
     }
 
-    // ── Marking scheme ──────────────────────────────────────────────
-    const CORRECT_MARKS = 5
-    const WRONG_MARKS   = -1
-    const SKIP_MARKS    = 0
-
-    let totalMarks = 0
-
-    attempt.answers.forEach((answer) => {
-      if (answer.isCorrect) {
-        totalMarks += CORRECT_MARKS
-      } else {
-        totalMarks += WRONG_MARKS
-      }
-    })
-
-    // Count correct answers for display
-    let correctCount = 0
-    attempt.answers.forEach((answer) => {
-      if (answer.isCorrect) correctCount++
-    })
-
-    const wrongCount      = attempt.answers.size - correctCount
-    const unattemptedCount = attempt.totalQuestions - attempt.answers.size
-    const maxMarks        = attempt.totalQuestions * CORRECT_MARKS
-
-    // Score percentage based on marks (can be negative, clamp at 0)
-    const scorePercent = Math.max(
-      0,
-      Math.round((totalMarks / maxMarks) * 100)
-    )
-
-    attempt.score       = totalMarks    // store actual marks
-    attempt.status      = 'completed'
-    attempt.completedAt = new Date()
-    await attempt.save()
-
-    // Fetch quiz with answers for results page
     const quiz = await Quiz.findById(attempt.quizId).populate({
       path:   'questions',
-      select: 'questionText questionImageUrl options correctOptionIndex explanation',
+      select: 'questionText questionImageUrl options correctOptionIndex explanation isGrace',
     })
 
+    // ── Use quiz-specific marking scheme ──────────────────────────────
+    const CORRECT_MARKS = quiz.markingScheme?.correct     ?? 5
+    const WRONG_MARKS   = quiz.markingScheme?.wrong       ?? -1
+    const SKIP_MARKS    = quiz.markingScheme?.unattempted ?? 0
+
+    let totalMarks       = 0
+    let correctCount     = 0
+    let wrongCount       = 0
+    let graceCount       = 0
+    let unattemptedCount = 0
+
     const results = quiz.questions.map((question, index) => {
-      const answer = attempt.answers.get(question._id.toString())
+      const answer  = attempt.answers.get(question._id.toString())
+      const isGrace = question.isGrace || false
+
+      let isCorrect    = false
+      let marksAwarded = SKIP_MARKS
+
+      if (isGrace) {
+        isCorrect    = true
+        marksAwarded = CORRECT_MARKS
+        graceCount++
+      } else if (answer) {
+        isCorrect    = answer.isCorrect
+        marksAwarded = isCorrect ? CORRECT_MARKS : WRONG_MARKS
+        if (isCorrect) correctCount++
+        else wrongCount++
+      } else {
+        unattemptedCount++
+      }
+
+      totalMarks += marksAwarded
+
       return {
         questionNumber:      index + 1,
         questionText:        question.questionText,
@@ -195,27 +192,41 @@ const submitAttempt = async (req, res, next) => {
         correctOptionIndex:  question.correctOptionIndex,
         explanation:         question.explanation,
         selectedOptionIndex: answer ? answer.selectedOptionIndex : null,
-        isCorrect:           answer ? answer.isCorrect : false,
+        isCorrect,
         isAttempted:         !!answer,
-        marksAwarded:        answer
-          ? (answer.isCorrect ? CORRECT_MARKS : WRONG_MARKS)
-          : SKIP_MARKS,
+        isGrace,
+        marksAwarded,
       }
     })
+
+    const maxMarks     = quiz.questions.length * CORRECT_MARKS
+    const scorePercent = maxMarks > 0
+      ? Math.max(0, Math.round((totalMarks / maxMarks) * 100))
+      : 0
+
+    attempt.score       = totalMarks
+    attempt.status      = 'completed'
+    attempt.completedAt = new Date()
+    await attempt.save()
 
     res.status(200).json({
       success: true,
       data: {
-        attemptId:attempt._id,
-        quizId: attempt.quizId,
+        attemptId:        attempt._id,
+        quizId:           attempt.quizId.toString(),
         totalMarks,
         maxMarks,
         correctCount,
         wrongCount,
+        graceCount,
         unattemptedCount,
         scorePercentage:  scorePercent,
         timeTaken:        Math.round((attempt.completedAt - attempt.startedAt) / 1000),
-        markingScheme:    { correct: CORRECT_MARKS, wrong: WRONG_MARKS, unattempted: SKIP_MARKS },
+        markingScheme: {
+          correct:     CORRECT_MARKS,
+          wrong:       WRONG_MARKS,
+          unattempted: SKIP_MARKS,
+        },
         results,
       },
     })
@@ -292,17 +303,19 @@ const getAttemptResults = async (req, res, next) => {
       return next(new Error('Completed attempt not found'))
     }
 
-    const CORRECT_MARKS = 5
-    const WRONG_MARKS   = -1
-
     const quiz = await Quiz.findById(attempt.quizId).populate({
       path:   'questions',
       select: 'questionText questionImageUrl options correctOptionIndex explanation isGrace',
     })
 
-    let correctCount    = 0
-    let wrongCount      = 0
-    let graceCount      = 0
+    // ── Use quiz-specific marking scheme ──────────────────────────────
+    const CORRECT_MARKS = quiz.markingScheme?.correct     ?? 5
+    const WRONG_MARKS   = quiz.markingScheme?.wrong       ?? -1
+    const SKIP_MARKS    = quiz.markingScheme?.unattempted ?? 0
+
+    let correctCount     = 0
+    let wrongCount       = 0
+    let graceCount       = 0
     let unattemptedCount = 0
 
     const results = quiz.questions.map((question, index) => {
@@ -310,7 +323,7 @@ const getAttemptResults = async (req, res, next) => {
       const isGrace = question.isGrace || false
 
       let isCorrect    = false
-      let marksAwarded = 0
+      let marksAwarded = SKIP_MARKS
 
       if (isGrace) {
         isCorrect    = true
@@ -342,15 +355,18 @@ const getAttemptResults = async (req, res, next) => {
 
     const totalMarks   = attempt.score
     const maxMarks     = attempt.totalQuestions * CORRECT_MARKS
-    const scorePercent = Math.max(0, Math.round((totalMarks / maxMarks) * 100))
-    const timeTaken    = Math.round((attempt.completedAt - attempt.startedAt) / 1000)
+    const scorePercent = maxMarks > 0
+      ? Math.max(0, Math.round((totalMarks / maxMarks) * 100))
+      : 0
+    const timeTaken    = Math.round(
+      (attempt.completedAt - attempt.startedAt) / 1000
+    )
 
     res.status(200).json({
       success: true,
       data: {
         attemptId:        attempt._id,
-        quizId:     attempt.quizId,
-        // ── Same field names as submitAttempt ──
+        quizId:           attempt.quizId.toString(),
         totalMarks,
         maxMarks,
         correctCount,
@@ -362,7 +378,7 @@ const getAttemptResults = async (req, res, next) => {
         markingScheme: {
           correct:     CORRECT_MARKS,
           wrong:       WRONG_MARKS,
-          unattempted: 0,
+          unattempted: SKIP_MARKS,
         },
         results,
       },
@@ -379,6 +395,6 @@ module.exports = {
   submitAttempt,
   abandonAttempt,
   getMyAttempts,
-  getAttemptResults,   // ← add this
+  getAttemptResults,  
 }
 
