@@ -430,20 +430,20 @@ const exams = [
     subjects: ["Agricultural Science", "Chemistry", "Botany", "Biochemistry", "Physics", "Mathematics", "+more"],
   },
   {
+    icon: "🏛️",
+    label: "UGC NET",
+    desc: "National Eligibility Test for Lectureship & JRF",
+    color: "bg-emerald-500",
+    available: true,
+    subjects: ["Foresnic Science - 2024,2025", "Other subjects coming soon"],
+  },
+  {
     icon: "📚",
     label: "NEET",
     desc: "National Eligibility cum Entrance Test — Undergraduate",
     color: "bg-purple-500",
     available: false,  
     subjects: ["Biology", "Chemistry", "Physics"],
-  },
-  {
-    icon: "🏛️",
-    label: "UGC NET",
-    desc: "National Eligibility Test for Lectureship & JRF",
-    color: "bg-emerald-500",
-    available: false,  // ❌ coming soon
-    subjects: ["Paper 1 (General)", "Computer Science", "Life Sciences", "Education", "+more"],
   },
 ];
 
