@@ -164,10 +164,12 @@ node scripts/importQuiz.js \
 
 
   '''''''''''''''edited import scripts for FSC PSC .............
-  node scripts/importQuiz.js --file="DSSSB_Scientific_Assistant_Chemistry_2021.xlsx" --exam="FSL_PSC" --stream="Delhi DSSSB" --year=2021 --title="2021 - DSSSB - Scientific Assistant - Chemistry" --markingCorrect=1 --markingWrong=0
+  node scripts/importQuiz.js --file="DSSSB_Scientific_Assistant_Ballistics_2021.xlsx" --exam="FSL_PSC" --stream="Delhi DSSSB" --year=2021 --title="2021 - DSSSB - Scientific Assistant - Ballistics" --markingCorrect=1 --markingWrong=0
 
   node scripts/importQuiz.js --file="DSSSB_Scientific_Assistant_General_2024.xlsx" --exam="FSL_PSC" --stream="Delhi DSSSB" --year=2024 --title="2024 - DSSSB - Scientific Assistant - General" --markingCorrect=1 --markingWrong=0
 
   node scripts/importQuiz.js --file="MPPSC_Scientific_Officer_Forensic_Serology_2013.xlsx" --exam="FSL_PSC" --stream="Madhya Pradesh PSC" --year=2013 --title="2013 - MP FSL - Scientific Officer - Forensic Serology" --markingCorrect=1 --markingWrong=0
 
- node scripts/importQuiz.js --file="RPSC_Sr._Scientific_Officer_Ballistics_2019.xlsx" --exam="FSL_PSC" --stream="Rajasthan PSC" --year=2019 --title="2019 - Rajasthan FSL - Sr. Scientific Officer - Ballistics" --markingCorrect=1 --markingWrong=0
+ node scripts/importQuiz.js --file="RPSC_Sr._Scientific_Officer_Chemistry_2019.xlsx" --exam="FSL_PSC" --stream="Rajasthan PSC" --year=2019 --title="2019 - Rajasthan FSL - Sr. Scientific Officer - Chemistry" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="RPSC_Sr._Scientific_Officer_Arson&Explosive_2019.xlsx" --exam="FSL_PSC" --stream="Rajasthan PSC" --year=2019 --title="2019 - Rajasthan FSL - Sr. Scientific Officer - Arson&Explosive" --markingCorrect=1 --markingWrong=0
