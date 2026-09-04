@@ -309,8 +309,8 @@ const StatsSection = () => {
   const [ref, inView] = useInView();
   const papers = useCounter(50, 1800, inView);
   const subjects = useCounter(11, 1500, inView);
-  const students = useCounter(100, 2000, inView);
-  const accuracy = useCounter(98, 1600, inView);
+  const exams = useCounter(3, 1600, inView);
+  const quizes = useCounter(100, 1600, inView);
 
   const stats = [
     {
@@ -326,14 +326,14 @@ const StatsSection = () => {
       color: "text-purple-500",
     },
     {
-      value: `${students}+`,
-      label: "Students",
+      value: `${exams}+`,
+      label: "Exams Covered",
       icon: Users,
       color: "text-green-500",
     },
     {
-      value: `${accuracy}%`,
-      label: "Content Accuracy",
+      value: `${quizes}+`,
+      label: "Quizes covered",
       icon: Target,
       color: "text-amber-500",
     },
@@ -439,11 +439,11 @@ const exams = [
   },
   {
     icon: "📚",
-    label: "NEET",
-    desc: "National Eligibility cum Entrance Test — Undergraduate",
+    label: "FSL PSC",
+    desc: "Forensic Science Laboratory PSC",
     color: "bg-purple-500",
-    available: false,  
-    subjects: ["Biology", "Chemistry", "Physics"],
+    available: true,  
+    subjects: ["Karnataka (KPS)", "Delhi (DSSSB)", "Madhya Pradesh (MPPSC)","Rajasthan (RPSC)"],
   },
 ];
 

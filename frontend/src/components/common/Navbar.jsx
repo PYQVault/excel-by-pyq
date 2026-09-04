@@ -51,16 +51,16 @@ const Navbar = () => {
               className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all"
               aria-label="Toggle theme"
             >
-              {isDark ? <Sun size={15} /> : <Moon size={15} />}
+              {isDark ? <Sun size={17} /> : <Moon size={17} />}
             </button>
 
             {/* Desktop — Home link */}
             {user && (
               <button
                 onClick={() => navigate("/")}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-shadow-2xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
               >
-                <Home size={13} />
+                <Home size={20} />
                 Home
               </button>
             )}

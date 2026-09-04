@@ -77,7 +77,7 @@ if (missing.length) {
   process.exit(1)
 }
 
-const VALID_EXAMS = ['CUET_UG', 'CUET_PG', 'UGC_NET']
+const VALID_EXAMS = ['CUET_UG', 'CUET_PG', 'UGC_NET','FSL_PSC']
 if (!VALID_EXAMS.includes(args.exam)) {
   console.error(`❌ Invalid exam. Valid: ${VALID_EXAMS.join(', ')}`)
   process.exit(1)

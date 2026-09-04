@@ -12,7 +12,7 @@ const QuizSchema = new mongoose.Schema({
   exam: {
     type: String,
     required: true,
-    enum: ['CUET_UG', 'CUET_PG', 'UGC_NET'],
+    enum: ['CUET_UG', 'CUET_PG', 'UGC_NET','FSL_PSC'],
   },
 
   // ── UGC NET has no stream — goes straight to subject ──────────────

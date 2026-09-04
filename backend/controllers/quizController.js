@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 const Quiz     = require('../models/Quiz')
 
+// ── Exams where stream = organization, no subject level ───────────────────
+const DIRECT_TO_QUIZ_EXAMS = ['FSL_PSC']
+
 // ── GET /api/quizzes/meta ─────────────────────────────────────────────────
 const getQuizMeta = async (req, res, next) => {
   try {
@@ -32,12 +35,20 @@ const getQuizMeta = async (req, res, next) => {
       const { exam, stream, subject } = _id
       if (!tree[exam]) tree[exam] = {}
 
-      // ── Use actual stream value — empty string for UGC NET ────────
-      const streamKey  = stream?.trim()  || ''
-      const subjectKey = subject?.trim() || '__none__'
+      const streamKey = stream?.trim() || ''
 
-      if (!tree[exam][streamKey])         tree[exam][streamKey] = {}
-      tree[exam][streamKey][subjectKey] = ids
+      if (DIRECT_TO_QUIZ_EXAMS.includes(exam)) {
+        // FSL_PSC: stream = organization, quizzes listed directly
+        // tree[FSL_PSC][Karnataka State Police] = [quiz1, quiz2, ...]
+        if (!tree[exam][streamKey]) tree[exam][streamKey] = []
+        tree[exam][streamKey].push(...ids)
+      } else {
+        // CUET_UG, UGC_NET, etc — normal subject grouping
+        const subjectKey = subject?.trim() || '__none__'
+        if (!tree[exam][streamKey])              tree[exam][streamKey] = {}
+        if (!tree[exam][streamKey][subjectKey])  tree[exam][streamKey][subjectKey] = []
+        tree[exam][streamKey][subjectKey].push(...ids)
+      }
     })
 
     res.status(200).json({ success: true, data: tree })
@@ -53,7 +64,6 @@ const getAllQuizzes = async (req, res, next) => {
 
     if (req.query.exam) filter.exam = req.query.exam
 
-    // ── Only add stream filter if it's a real stream ───────────────
     if (req.query.stream && req.query.stream !== '__no_stream__') {
       filter.stream = req.query.stream
     }
@@ -101,7 +111,7 @@ const getQuizById = async (req, res, next) => {
 
     const quiz = await Quiz.findById(req.params.id).populate({
       path:   'questions',
-      select: 'questionText questionImageUrl options explanation',
+      select: 'questionText questionImageUrl options correctOptionIndex explanation isGrace',
     })
 
     if (!quiz) {

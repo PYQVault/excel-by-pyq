@@ -119,3 +119,55 @@ node scripts/importQuiz.js \
   node scripts/importQuiz.js --file="FORENSIC_2025_JUNE.xlsx" --exam="UGC_NET" --subject="Forensic Science" --year=2025 --variant="June" --markingCorrect=2 --markingWrong=0  --title="UGC NET 2025 June - Forensic Science"
 
   node scripts/importQuiz.js --file="FORENSIC_2025_JUNE.xlsx" --exam="UGC_NET" --subject="Forensic Science" --year=2025 --variant="June" --markingCorrect=2  --markingWrong=0 --title="UGC NET 2025 June - Forensic Science"
+
+  .........................After sept 4 ...FSL PSC....................
+  .........New import scripts for rach statewise question papers.............
+  # Karnataka — KSP General 2020-21
+node scripts/importQuiz.js \
+  --file="KSP_General_2020-21.xlsx" \
+  --exam="FSL_PSC" \
+  --stream="Karnataka State Police (KSP)" \
+  --year=2020 \
+  --title="2020-21 - KSP - General" \
+  --markingCorrect=1 \
+  --markingWrong=0
+
+# Delhi — DSSSB Scientific Assistant Chemistry 2021
+node scripts/importQuiz.js \
+  --file="DSSSB_Scientific_Assistant_Chemistry_2021.xlsx" \
+  --exam="FSL_PSC" \
+  --stream="Delhi DSSSB" \
+  --year=2021 \
+  --title="2021 - DSSSB - Scientific Assistant - Chemistry" \
+  --markingCorrect=1 \
+  --markingWrong=0
+
+# Madhya Pradesh 2022
+node scripts/importQuiz.js \
+  --file="MP_FSL_2022.xlsx" \
+  --exam="FSL_PSC" \
+  --stream="Madhya Pradesh PSC" \
+  --year=2022 \
+  --title="2022 - MP FSL - General" \
+  --markingCorrect=1 \
+  --markingWrong=0
+
+# Rajasthan 2023
+node scripts/importQuiz.js \
+  --file="Rajasthan_FSL_2023.xlsx" \
+  --exam="FSL_PSC" \
+  --stream="Rajasthan PSC" \
+  --year=2023 \
+  --title="2023 - Rajasthan FSL - General" \
+  --markingCorrect=1 \
+  --markingWrong=0
+
+
+  '''''''''''''''edited import scripts for FSC PSC .............
+  node scripts/importQuiz.js --file="DSSSB_Scientific_Assistant_Chemistry_2021.xlsx" --exam="FSL_PSC" --stream="Delhi DSSSB" --year=2021 --title="2021 - DSSSB - Scientific Assistant - Chemistry" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="DSSSB_Scientific_Assistant_General_2024.xlsx" --exam="FSL_PSC" --stream="Delhi DSSSB" --year=2024 --title="2024 - DSSSB - Scientific Assistant - General" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="MPPSC_Scientific_Officer_Forensic_Serology_2013.xlsx" --exam="FSL_PSC" --stream="Madhya Pradesh PSC" --year=2013 --title="2013 - MP FSL - Scientific Officer - Forensic Serology" --markingCorrect=1 --markingWrong=0
+
+ node scripts/importQuiz.js --file="RPSC_Sr._Scientific_Officer_Ballistics_2019.xlsx" --exam="FSL_PSC" --stream="Rajasthan PSC" --year=2019 --title="2019 - Rajasthan FSL - Sr. Scientific Officer - Ballistics" --markingCorrect=1 --markingWrong=0
