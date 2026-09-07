@@ -307,8 +307,8 @@ const StepCard = ({ number, title, desc, icon: Icon, delay }) => {
 // ── Stats Section ──────────────────────────────────────────────────────────
 const StatsSection = () => {
   const [ref, inView] = useInView();
-  const papers = useCounter(50, 1800, inView);
-  const subjects = useCounter(11, 1500, inView);
+  const papers = useCounter(100, 1800, inView);
+  const subjects = useCounter(30, 1500, inView);
   const exams = useCounter(3, 1600, inView);
   const quizes = useCounter(100, 1600, inView);
 
@@ -438,7 +438,7 @@ const exams = [
     subjects: ["Foresnic Science - 2024,2025", "Other subjects coming soon"],
   },
   {
-    icon: "📚",
+    icon: "🔬",
     label: "FSL PSC",
     desc: "Forensic Science Laboratory PSC",
     color: "bg-purple-500",

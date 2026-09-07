@@ -620,75 +620,71 @@ const handleBreadcrumb = (index) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {Object.entries(EXAM_CONFIG).map(([key, cfg]) => {
-                  const examData = meta[key];
-                  const subjectCount = examData
-                    ? Object.values(examData).reduce(
-                        (s, streams) => s + Object.keys(streams).length,
-                        0,
-                      )
-                    : 0;
-                  const quizCount = examData
-                    ? Object.values(examData).reduce(
-                        (s, streams) =>
-                          s +
-                          Object.values(streams).reduce(
-                            (ss, subjects) => ss + subjects.length,
-                            0,
-                          ),
-                        0,
-                      )
-                    : 0;
+  const examData = meta[key];
 
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => handleExamClick(key, examData)}
-                      className={`group relative text-left p-6 rounded-2xl border-2 transition-all duration-300
-                        bg-white dark:bg-slate-800 hover:shadow-xl
-                        ${
-                          examData
-                            ? `${cfg.border} hover:border-blue-400 cursor-pointer`
-                            : "border-slate-100 dark:border-slate-700 opacity-60 cursor-not-allowed"
-                        }`}
-                    >
-                      <div
-                        className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${cfg.color} opacity-10 rounded-2xl`}
-                      />
-                      <div className="relative z-10">
-                        <div className="text-4xl mb-3">{cfg.icon}</div>
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">
-                          {cfg.label}
-                        </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                          {cfg.fullName}
-                        </p>
-                        {examData ? (
-                          <div className="flex items-center gap-3 text-xs">
-                            <span
-                              className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}
-                            >
-                              {subjectCount} Subjects
-                            </span>
-                            <span
-                              className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}
-                            >
-                              {quizCount} Papers
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-400">
-                            Coming soon
-                          </span>
-                        )}
-                        {examData && (
-                          <div className="mt-4 flex items-center gap-1 text-blue-500 text-xs font-semibold group-hover:gap-2 transition-all">
-                            Browse papers <ChevronRight size={14} />
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
+  let subjectCount = 0;
+  let quizCount    = 0;
+
+  if (examData) {
+    if (DIRECT_QUIZ_EXAMS.includes(key)) {
+      // FSL_PSC: { "Karnataka State Police": [quiz1, quiz2], ... }
+      Object.values(examData).forEach((orgQuizzes) => {
+        subjectCount += 1
+        quizCount    += Array.isArray(orgQuizzes) ? orgQuizzes.length : 0
+      })
+    } else {
+      // CUET_UG, UGC_NET: { stream: { subject: [quizzes] } }
+      Object.values(examData).forEach((streamObj) => {
+        if (typeof streamObj === 'object' && !Array.isArray(streamObj)) {
+          Object.values(streamObj).forEach((papers) => {
+            subjectCount += 1
+            quizCount    += Array.isArray(papers) ? papers.length : 0
+          })
+        }
+      })
+    }
+  }
+
+  return (
+    <button
+      key={key}
+      onClick={() => handleExamClick(key, examData)}
+      className={`group relative text-left p-6 rounded-2xl border-2 transition-all duration-300
+        bg-white dark:bg-slate-800 hover:shadow-xl
+        ${examData
+          ? `${cfg.border} hover:border-blue-400 cursor-pointer`
+          : "border-slate-100 dark:border-slate-700 opacity-60 cursor-not-allowed"
+        }`}
+    >
+      <div className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${cfg.color} opacity-10 rounded-2xl`} />
+      <div className="relative z-10">
+        <div className="text-4xl mb-3">{cfg.icon}</div>
+        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">{cfg.label}</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">{cfg.fullName}</p>
+        {examData ? (
+          <div className="flex items-center gap-3 text-xs">
+            <span className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}>
+              {DIRECT_QUIZ_EXAMS.includes(key)
+                ? `${Object.keys(examData).length} Orgs`
+                : `${subjectCount} Subjects`
+              }
+            </span>
+            <span className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}>
+              {quizCount} Papers
+            </span>
+          </div>
+        ) : (
+          <span className="text-xs text-slate-400">Coming soon</span>
+        )}
+        {examData && (
+          <div className="mt-4 flex items-center gap-1 text-blue-500 text-xs font-semibold group-hover:gap-2 transition-all">
+            Browse papers <ChevronRight size={14} />
+          </div>
+        )}
+      </div>
+    </button>
+  );
+})}
               </div>
             </div>
           </>
