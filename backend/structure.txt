@@ -162,14 +162,45 @@ node scripts/importQuiz.js \
   --markingCorrect=1 \
   --markingWrong=0
 
+# TNPSC 2023
+node scripts/importQuiz.js \
+  --file="TNPSC_2023.xlsx" \
+  --exam="FSL_PSC" \
+  --stream="Tamil Nadu PSC" \
+  --year=2023 \
+  --title="2023 - TNPSC - General" \
+  --markingCorrect=1 \
+  --markingWrong=0
+
+  # Kerala PSC 2023
+node scripts/importQuiz.js \
+  --file="KPSC_2023.xlsx" \
+  --exam="FSL_PSC" \
+  --stream="Kerala PSC" \
+  --year=2023 \
+  --title="2023 - Kerala PSC - General" \
+  --markingCorrect=1 \
+  --markingWrong=0
 
   '''''''''''''''edited import scripts for FSC PSC .............
-  node scripts/importQuiz.js --file="DSSSB_Scientific_Assistant_Ballistics_2021.xlsx" --exam="FSL_PSC" --stream="Delhi DSSSB" --year=2021 --title="2021 - DSSSB - Scientific Assistant - Ballistics" --markingCorrect=1 --markingWrong=0
+  node scripts/importQuiz.js --file="KSP_Scientific_Officer_Toxicology_Branch_2016.xlsx" --exam="FSL_PSC" --stream="Karnataka State Police (KSP)" --year=2016 --title="2016 - KSP - Scientific Officer - Toxicology Branch" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="KSP_General_2023.xlsx" --exam="FSL_PSC" --stream="Karnataka State Police (KSP)" --year=2023 --title="2023 - KSP - General - (2023)" --markingCorrect=1 --markingWrong=0
 
   node scripts/importQuiz.js --file="DSSSB_Scientific_Assistant_General_2024.xlsx" --exam="FSL_PSC" --stream="Delhi DSSSB" --year=2024 --title="2024 - DSSSB - Scientific Assistant - General" --markingCorrect=1 --markingWrong=0
 
-  node scripts/importQuiz.js --file="MPPSC_Scientific_Officer_Forensic_Serology_2013.xlsx" --exam="FSL_PSC" --stream="Madhya Pradesh PSC" --year=2013 --title="2013 - MP FSL - Scientific Officer - Forensic Serology" --markingCorrect=1 --markingWrong=0
+  node scripts/importQuiz.js --file="MPPSC_Scientific_Officer_Forensic_Physics_2013.xlsx" --exam="FSL_PSC" --stream="Madhya Pradesh PSC" --year=2013 --title="2013 - MP FSL - Scientific Officer - Forensic Physics" --markingCorrect=1 --markingWrong=0
 
  node scripts/importQuiz.js --file="RPSC_Sr._Scientific_Officer_Chemistry_2019.xlsx" --exam="FSL_PSC" --stream="Rajasthan PSC" --year=2019 --title="2019 - Rajasthan FSL - Sr. Scientific Officer - Chemistry" --markingCorrect=1 --markingWrong=0
 
   node scripts/importQuiz.js --file="RPSC_Sr._Scientific_Officer_Arson&Explosive_2019.xlsx" --exam="FSL_PSC" --stream="Rajasthan PSC" --year=2019 --title="2019 - Rajasthan FSL - Sr. Scientific Officer - Arson&Explosive" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="TNPSC_Jr._Scientific_Officer_Forensic_Science_2019.xlsx" --exam="FSL_PSC" --stream="Tamil Nadu PSC" --year=2019 --title="2019 - TNPSC - Jr. Scientific Officer - Forensic Science" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="TNPSC_Jr.Scientific_Officer_Computer_Science_2019.xlsx" --exam="FSL_PSC" --stream="Tamil Nadu PSC" --year=2019 --title="2019 - TNPSC - Jr. Scientific Officer - Computer Science" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="TNPSC_Jr.Scientific_Officer_General_Studies_2019.xlsx" --exam="FSL_PSC" --stream="Tamil Nadu PSC" --year=2019 --title="2019 - TNPSC - Jr. Scientific Officer - General Studies" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="TNPSC_Scientific_Assistant_FORENSIC_SCIENCE_2010.xlsx" --exam="FSL_PSC" --stream="Tamil Nadu PSC" --year=2010 --title="2010 - TNPSC - Scientific Assistant - Forensic Science" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="Scientific_officer_Chemical_Examiner_2025.xlsx" --exam="FSL_PSC" --stream="Kerala PSC" --year=2025 --title="2025 - Kerala PSC - Scientific Officer - Chemical Examiner" --markingCorrect=1 --markingWrong=0

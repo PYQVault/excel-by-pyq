@@ -307,10 +307,10 @@ const StepCard = ({ number, title, desc, icon: Icon, delay }) => {
 // ── Stats Section ──────────────────────────────────────────────────────────
 const StatsSection = () => {
   const [ref, inView] = useInView();
-  const papers = useCounter(100, 1800, inView);
+  const papers = useCounter(150, 1800, inView);
   const subjects = useCounter(30, 1500, inView);
   const exams = useCounter(3, 1600, inView);
-  const quizes = useCounter(100, 1600, inView);
+  const quizes = useCounter(150, 1600, inView);
 
   const stats = [
     {
