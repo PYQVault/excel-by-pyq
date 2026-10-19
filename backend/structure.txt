@@ -203,4 +203,16 @@ node scripts/importQuiz.js \
 
   node scripts/importQuiz.js --file="TNPSC_Scientific_Assistant_FORENSIC_SCIENCE_2010.xlsx" --exam="FSL_PSC" --stream="Tamil Nadu PSC" --year=2010 --title="2010 - TNPSC - Scientific Assistant - Forensic Science" --markingCorrect=1 --markingWrong=0
 
-  node scripts/importQuiz.js --file="Scientific_officer_Chemical_Examiner_2025.xlsx" --exam="FSL_PSC" --stream="Kerala PSC" --year=2025 --title="2025 - Kerala PSC - Scientific Officer - Chemical Examiner" --markingCorrect=1 --markingWrong=0
+  node scripts/importQuiz.js --file="JKPSC_Forensic_Chemistry_Toxicology_2022.xlsx" --exam="FSL_PSC" --stream="Jammu and Kashmir PSC" --year=2022 --title="2022 - JKPSC - Scientific Officer - Forensic Chemistry and Toxicology" --markingCorrect=1 --markingWrong=0
+
+  node scripts/importQuiz.js --file="JKPSC_Scientific_Officer_Biology_2022.xlsx" --exam="FSL_PSC" --stream="Jammu and Kashmir PSC" --year=2022 --title="2022 - JKPSC - Scientific Officer - Biology" --markingCorrect=1 --markingWrong=0
+
+node scripts/importQuiz.js --file="CGPSC_Sr._Scientific_Officer_Anthropology_2016.xlsx" --exam="FSL_PSC" --stream="Chhattisgarh PSC" --year=2016 --title="2016 - CGPSC - Senior Scientific Officer - Anthropology" --markingCorrect=1 --markingWrong=0
+
+node scripts/importQuiz.js --file="CGPSC_Sr._Scientific_Officer_Biochemistry_2016.xlsx" --exam="FSL_PSC" --stream="Chhattisgarh PSC" --year=2016 --title="2016 - CGPSC - Senior Scientific Officer - Biochemistry" --markingCorrect=1 --markingWrong=0
+
+node scripts/importQuiz.js --file="CGPSC_Sr._Scientific_Officer_Zoology_2016.xlsx" --exam="FSL_PSC" --stream="Chhattisgarh PSC" --year=2016 --title="2016 - CGPSC - Senior Scientific Officer - Zoology" --markingCorrect=1 --markingWrong=0
+
+node scripts/importQuiz.js --file="COMMERCE_2022_OCT_2.xlsx" --exam="UGC_NET" --subject="Commerce" --year=2022 --variant="Oct_2" --markingCorrect=2 --markingWrong=0 --title="UGC NET 2022 Oct_2 - Commerce"
+
+node scripts/importQuiz.js --file="COMMERCE_2026_JAN.xlsx" --exam="UGC_NET" --subject="Commerce" --year=2026 --variant="Jan" --markingCorrect=2 --markingWrong=0 --title="UGC NET 2026 Jan - Commerce"

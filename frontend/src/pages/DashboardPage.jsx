@@ -33,8 +33,8 @@ const EXAM_CONFIG = {
     fullName: "Common University Entrance Test (UG)",
     icon: "🎓",
     color: "from-blue-500 to-indigo-600",
-    lightBg: "bg-blue-50 dark:bg-blue-900/20", 
-    border: "border-blue-200 dark:border-blue-700", 
+    lightBg: "bg-blue-50 dark:bg-blue-900/20",
+    border: "border-blue-200 dark:border-blue-700",
     badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   },
 
@@ -42,20 +42,22 @@ const EXAM_CONFIG = {
     label: "UGC NET",
     fullName: "National Eligibility Test",
     icon: "🏛️",
-    color: "from-emerald-500 to-teal-600", 
-    lightBg: "bg-emerald-50 dark:bg-emerald-900/20", 
-    border: "border-emerald-200 dark:border-emerald-700", 
-    badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+    color: "from-emerald-500 to-teal-600",
+    lightBg: "bg-emerald-50 dark:bg-emerald-900/20",
+    border: "border-emerald-200 dark:border-emerald-700",
+    badge:
+      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
   },
   FSL_PSC: {
-  label:    'FSL PSC',
-  fullName: 'Forensic Science Laboratory — State PSC Exams',
-  icon:     '🔬',
-  color:    'from-indigo-500 to-violet-600',
-  lightBg:  'bg-indigo-50 dark:bg-indigo-900/20',
-  border:   'border-indigo-200 dark:border-indigo-700',
-  badge:    'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
-},
+    label: "FSL PSC",
+    fullName: "Forensic Science Laboratory — State PSC Exams",
+    icon: "🔬",
+    color: "from-indigo-500 to-violet-600",
+    lightBg: "bg-indigo-50 dark:bg-indigo-900/20",
+    border: "border-indigo-200 dark:border-indigo-700",
+    badge:
+      "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+  },
 };
 
 // ── Exams that go directly to subjects (no stream step) ───────────────────
@@ -154,8 +156,8 @@ const QuizCard = ({ quiz, attempt, onAction }) => {
     ? `${quiz.year} · ${quiz.variant}`
     : `${quiz.year}`;
   const subjectLabel = quiz.subject?.trim()
-  ? quiz.subject
-  : quiz.title.replace(/^\d{4}\s*-\s*/, "");
+    ? quiz.subject
+    : quiz.title.replace(/^\d{4}\s*-\s*/, "");
 
   const barColor =
     status === "completed"
@@ -436,49 +438,61 @@ const DashboardPage = () => {
   };
 
   // ── Breadcrumbs ──────────────────────────────────────────────────────
- const breadcrumbs = ['Home']
-if (selectedExam) breadcrumbs.push(EXAM_CONFIG[selectedExam]?.label || selectedExam)
+  const breadcrumbs = ["Home"];
+  if (selectedExam)
+    breadcrumbs.push(EXAM_CONFIG[selectedExam]?.label || selectedExam);
 
-// Show stream in breadcrumb for FSL_PSC (org name) and CUET UG
-// Hide for UGC NET (no stream)
-if (selectedStream && !isNoStreamExam(selectedExam)) {
-  breadcrumbs.push(selectedStream)
-}
+  // Show stream in breadcrumb for FSL_PSC (org name) and CUET UG
+  // Hide for UGC NET (no stream)
+  if (selectedStream && !isNoStreamExam(selectedExam)) {
+    breadcrumbs.push(selectedStream);
+  }
 
-// Only show subject if it's real (not internal markers)
-if (selectedSubject && !['__none__', '__direct__'].includes(selectedSubject)) {
-  breadcrumbs.push(selectedSubject)
-}
+  // Only show subject if it's real (not internal markers)
+  if (
+    selectedSubject &&
+    !["__none__", "__direct__"].includes(selectedSubject)
+  ) {
+    breadcrumbs.push(selectedSubject);
+  }
 
   // ── Breadcrumb navigation ────────────────────────────────────────────
-const handleBreadcrumb = (index) => {
-  if (index === 0) {
-    setView('home'); setSelectedExam(null); setSelectedStream(null); setSelectedSubject(null)
-    return
-  }
-  if (index === 1) {
-    if (isNoStreamExam(selectedExam)) {
-      setView('home'); setSelectedExam(null); setSelectedStream(null)
-    } else {
-      setView('stream'); setSelectedStream(null)
+  const handleBreadcrumb = (index) => {
+    if (index === 0) {
+      setView("home");
+      setSelectedExam(null);
+      setSelectedStream(null);
+      setSelectedSubject(null);
+      return;
     }
-    setSelectedSubject(null)
-    return
-  }
-  if (index === 2) {
-    if (DIRECT_QUIZ_EXAMS.includes(selectedExam)) {
-      // FSL_PSC: index 2 = org name = stream view
-      setView('stream'); setSelectedSubject(null)
-    } else {
-      setView('subject'); setSelectedSubject(null)
+    if (index === 1) {
+      if (isNoStreamExam(selectedExam)) {
+        setView("home");
+        setSelectedExam(null);
+        setSelectedStream(null);
+      } else {
+        setView("stream");
+        setSelectedStream(null);
+      }
+      setSelectedSubject(null);
+      return;
     }
-    return
-  }
-  if (index === 3) {
-    setView('quizzes')
-    return
-  }
-}
+    if (index === 2) {
+      if (DIRECT_QUIZ_EXAMS.includes(selectedExam)) {
+        // FSL_PSC: index 2 = org name = stream view
+        setView("stream");
+        setSelectedSubject(null);
+      } else {
+        setView("subject");
+        setSelectedSubject(null);
+      }
+      return;
+    }
+    if (index === 3) {
+      setView("quizzes");
+      return;
+    }
+  };
 
   // ── Exam card click ──────────────────────────────────────────────────
   const handleExamClick = (key, examData) => {
@@ -620,71 +634,90 @@ const handleBreadcrumb = (index) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {Object.entries(EXAM_CONFIG).map(([key, cfg]) => {
-  const examData = meta[key];
+                  const examData = meta[key];
 
-  let subjectCount = 0;
-  let quizCount    = 0;
+                  let subjectCount = 0;
+                  let quizCount = 0;
 
-  if (examData) {
-    if (DIRECT_QUIZ_EXAMS.includes(key)) {
-      // FSL_PSC: { "Karnataka State Police": [quiz1, quiz2], ... }
-      Object.values(examData).forEach((orgQuizzes) => {
-        subjectCount += 1
-        quizCount    += Array.isArray(orgQuizzes) ? orgQuizzes.length : 0
-      })
-    } else {
-      // CUET_UG, UGC_NET: { stream: { subject: [quizzes] } }
-      Object.values(examData).forEach((streamObj) => {
-        if (typeof streamObj === 'object' && !Array.isArray(streamObj)) {
-          Object.values(streamObj).forEach((papers) => {
-            subjectCount += 1
-            quizCount    += Array.isArray(papers) ? papers.length : 0
-          })
-        }
-      })
-    }
-  }
+                  if (examData) {
+                    if (DIRECT_QUIZ_EXAMS.includes(key)) {
+                      // FSL_PSC: { "Karnataka State Police": [quiz1, quiz2], ... }
+                      Object.values(examData).forEach((orgQuizzes) => {
+                        subjectCount += 1;
+                        quizCount += Array.isArray(orgQuizzes)
+                          ? orgQuizzes.length
+                          : 0;
+                      });
+                    } else {
+                      // CUET_UG, UGC_NET: { stream: { subject: [quizzes] } }
+                      Object.values(examData).forEach((streamObj) => {
+                        if (
+                          typeof streamObj === "object" &&
+                          !Array.isArray(streamObj)
+                        ) {
+                          Object.values(streamObj).forEach((papers) => {
+                            subjectCount += 1;
+                            quizCount += Array.isArray(papers)
+                              ? papers.length
+                              : 0;
+                          });
+                        }
+                      });
+                    }
+                  }
 
-  return (
-    <button
-      key={key}
-      onClick={() => handleExamClick(key, examData)}
-      className={`group relative text-left p-6 rounded-2xl border-2 transition-all duration-300
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => handleExamClick(key, examData)}
+                      className={`group relative text-left p-6 rounded-2xl border-2 transition-all duration-300
         bg-white dark:bg-slate-800 hover:shadow-xl
-        ${examData
-          ? `${cfg.border} hover:border-blue-400 cursor-pointer`
-          : "border-slate-100 dark:border-slate-700 opacity-60 cursor-not-allowed"
+        ${
+          examData
+            ? `${cfg.border} hover:border-blue-400 cursor-pointer`
+            : "border-slate-100 dark:border-slate-700 opacity-60 cursor-not-allowed"
         }`}
-    >
-      <div className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${cfg.color} opacity-10 rounded-2xl`} />
-      <div className="relative z-10">
-        <div className="text-4xl mb-3">{cfg.icon}</div>
-        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">{cfg.label}</h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">{cfg.fullName}</p>
-        {examData ? (
-          <div className="flex items-center gap-3 text-xs">
-            <span className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}>
-              {DIRECT_QUIZ_EXAMS.includes(key)
-                ? `${Object.keys(examData).length} Orgs`
-                : `${subjectCount} Subjects`
-              }
-            </span>
-            <span className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}>
-              {quizCount} Papers
-            </span>
-          </div>
-        ) : (
-          <span className="text-xs text-slate-400">Coming soon</span>
-        )}
-        {examData && (
-          <div className="mt-4 flex items-center gap-1 text-blue-500 text-xs font-semibold group-hover:gap-2 transition-all">
-            Browse papers <ChevronRight size={14} />
-          </div>
-        )}
-      </div>
-    </button>
-  );
-})}
+                    >
+                      <div
+                        className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${cfg.color} opacity-10 rounded-2xl`}
+                      />
+                      <div className="relative z-10">
+                        <div className="text-4xl mb-3">{cfg.icon}</div>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">
+                          {cfg.label}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                          {cfg.fullName}
+                        </p>
+                        {examData ? (
+                          <div className="flex items-center gap-3 text-xs">
+                            <span
+                              className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}
+                            >
+                              {DIRECT_QUIZ_EXAMS.includes(key)
+                                ? `${Object.keys(examData).length} Orgs`
+                                : `${subjectCount} Subjects`}
+                            </span>
+                            <span
+                              className={`px-2 py-1 rounded-lg font-semibold ${cfg.badge}`}
+                            >
+                              {quizCount} Papers
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400">
+                            Coming soon
+                          </span>
+                        )}
+                        {examData && (
+                          <div className="mt-4 flex items-center gap-1 text-blue-500 text-xs font-semibold group-hover:gap-2 transition-all">
+                            Browse papers <ChevronRight size={14} />
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </>
@@ -692,99 +725,116 @@ const handleBreadcrumb = (index) => {
 
         {/* ── STREAM VIEW (CUET UG / CUET PG only) ──────────────────── */}
         {view === "stream" && selectedExam && (
-  <>
-    <div className="flex items-center gap-3 mb-6">
-      <button
-        onClick={() => { setView("home"); setSelectedExam(null); setSelectedStream(null) }}
-        className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-colors shadow-sm"
-      >
-        <ChevronLeft size={18} className="text-slate-600 dark:text-slate-300" />
-      </button>
-      <div>
-        <Breadcrumb items={breadcrumbs} onNavigate={handleBreadcrumb} />
-        <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
-          {DIRECT_QUIZ_EXAMS.includes(selectedExam)
-            ? 'Select Organisation'
-            : 'Select Section'
-          }
-        </h2>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {Object.entries(meta[selectedExam] || {}).map(([stream, value]) => {
-        const cfg = EXAM_CONFIG[selectedExam]
-
-        // ── FSL_PSC: value is an array of quizzes directly ────────────
-        const isDirect = DIRECT_QUIZ_EXAMS.includes(selectedExam)
-        const quizCount    = isDirect
-          ? value.length                                          // array length
-          : Object.values(value).reduce((s, q) => s + q.length, 0)
-        const subjectCount = isDirect
-          ? null                                                  // no subjects
-          : Object.keys(value).length
-        const previewYears = isDirect
-          ? [...new Set(value.map(q => q.year))].slice(0, 3)
-          : []
-        const previewSubjects = isDirect
-          ? []
-          : Object.keys(value).slice(0, 3)
-
-        return (
-          <button
-            key={stream}
-            onClick={() => {
-              setSelectedStream(stream)
-              if (isDirect) {
-                // FSL_PSC → org selected → go straight to quizzes
-                setSelectedSubject('__direct__')
-                setView('quizzes')
-              } else {
-                const subjectKeys = Object.keys(value)
-                if (subjectKeys.length === 1 && subjectKeys[0] === 'General Aptitude') {
-                  setSelectedSubject('General Aptitude')
-                  setView('quizzes')
-                } else {
-                  setView('subject')
-                }
-              }
-            }}
-            className="group text-left p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300"
-          >
-            <div className={`w-10 h-10 bg-gradient-to-br ${cfg.color} rounded-xl flex items-center justify-center mb-3`}>
-              <Layers size={18} className="text-white" />
+          <>
+            <div className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => {
+                  setView("home");
+                  setSelectedExam(null);
+                  setSelectedStream(null);
+                }}
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-colors shadow-sm"
+              >
+                <ChevronLeft
+                  size={18}
+                  className="text-slate-600 dark:text-slate-300"
+                />
+              </button>
+              <div>
+                <Breadcrumb items={breadcrumbs} onNavigate={handleBreadcrumb} />
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
+                  {DIRECT_QUIZ_EXAMS.includes(selectedExam)
+                    ? "Select Organisation"
+                    : "Select Section"}
+                </h2>
+              </div>
             </div>
-            <h3 className="font-bold text-slate-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-              {stream}
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-              {isDirect
-                ? `${quizCount} paper${quizCount !== 1 ? 's' : ''}`
-                : `${subjectCount} subject${subjectCount !== 1 ? 's' : ''} · ${quizCount} paper${quizCount !== 1 ? 's' : ''}`
-              }
-            </p>
 
-            {/* Preview tags */}
-            <div className="flex flex-wrap gap-1.5">
-              {isDirect
-                ? previewYears.map((year) => (
-                    <span key={year} className={`text-xs px-2 py-0.5 rounded-md font-medium ${cfg.badge}`}>
-                      {year}
-                    </span>
-                  ))
-                : previewSubjects.map((sub) => (
-                    <span key={sub} className={`text-xs px-2 py-0.5 rounded-md font-medium ${cfg.badge}`}>
-                      {sub}
-                    </span>
-                  ))
-              }
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(meta[selectedExam] || {}).map(
+                ([stream, value]) => {
+                  const cfg = EXAM_CONFIG[selectedExam];
+
+                  // ── FSL_PSC: value is an array of quizzes directly ────────────
+                  const isDirect = DIRECT_QUIZ_EXAMS.includes(selectedExam);
+                  const quizCount = isDirect
+                    ? value.length // array length
+                    : Object.values(value).reduce((s, q) => s + q.length, 0);
+                  const subjectCount = isDirect
+                    ? null // no subjects
+                    : Object.keys(value).length;
+                  const previewYears = isDirect
+                    ? [...new Set(value.map((q) => q.year))].slice(0, 3)
+                    : [];
+                  const previewSubjects = isDirect
+                    ? []
+                    : Object.keys(value).slice(0, 3);
+
+                  return (
+                    <button
+                      key={stream}
+                      onClick={() => {
+                        setSelectedStream(stream);
+                        if (isDirect) {
+                          // FSL_PSC → org selected → go straight to quizzes
+                          setSelectedSubject("__direct__");
+                          setView("quizzes");
+                        } else {
+                          const subjectKeys = Object.keys(value);
+                          if (
+                            subjectKeys.length === 1 &&
+                            subjectKeys[0] === "General Aptitude"
+                          ) {
+                            setSelectedSubject("General Aptitude");
+                            setView("quizzes");
+                          } else {
+                            setView("subject");
+                          }
+                        }
+                      }}
+                      className="group text-left p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300"
+                    >
+                      <div
+                        className={`w-10 h-10 bg-gradient-to-br ${cfg.color} rounded-xl flex items-center justify-center mb-3`}
+                      >
+                        <Layers size={18} className="text-white" />
+                      </div>
+                      <h3 className="font-bold text-slate-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {stream}
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                        {isDirect
+                          ? `${quizCount} paper${quizCount !== 1 ? "s" : ""}`
+                          : `${subjectCount} subject${subjectCount !== 1 ? "s" : ""} · ${quizCount} paper${quizCount !== 1 ? "s" : ""}`}
+                      </p>
+
+                      {/* Preview tags */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {isDirect
+                          ? previewYears.map((year) => (
+                              <span
+                                key={year}
+                                className={`text-xs px-2 py-0.5 rounded-md font-medium ${cfg.badge}`}
+                              >
+                                {year}
+                              </span>
+                            ))
+                          : previewSubjects.map((sub) => (
+                              <span
+                                key={sub}
+                                className={`text-xs px-2 py-0.5 rounded-md font-medium ${cfg.badge}`}
+                              >
+                                {sub}
+                              </span>
+                            ))}
+                      </div>
+                    </button>
+                  );
+                },
+              )}
             </div>
-          </button>
-        )
-      })}
-    </div>
-  </>
-)}
+          </>
+        )}
 
         {/* ── SUBJECT VIEW ───────────────────────────────────────────── */}
         {view === "subject" && selectedExam && (
@@ -849,14 +899,16 @@ const handleBreadcrumb = (index) => {
                         {papers.length} paper{papers.length !== 1 ? "s" : ""}
                       </span>
                       <div className="flex gap-1 flex-wrap">
-                        {papers.slice(0, 3).map((p) => (
-                          <span
-                            key={p._id || p.year}
-                            className={`text-xs px-1.5 py-0.5 rounded font-semibold ${cfg.badge}`}
-                          >
-                            {p.year}
-                          </span>
-                        ))}
+                        {[...new Set(papers.map((p) => p.year))]
+                          .slice(0, 3)
+                          .map((year) => (
+                            <span
+                              key={year}
+                              className={`text-xs px-1.5 py-0.5 rounded font-semibold ${cfg.badge}`}
+                            >
+                              {year}
+                            </span>
+                          ))}
                       </div>
                     </div>
                   </button>
@@ -867,38 +919,41 @@ const handleBreadcrumb = (index) => {
         )}
 
         {/* ── QUIZZES VIEW ───────────────────────────────────────────── */}
-   {view === "quizzes" && selectedSubject && (
-  <>
-    <div className="flex items-center gap-3 mb-6">
-      <button
-        onClick={() => {
-          // FSL_PSC → back to stream (org list)
-          if (DIRECT_QUIZ_EXAMS.includes(selectedExam)) {
-            setView('stream')
-            setSelectedSubject(null)
-            return
-          }
-          // UGC NET → back to subject
-          if (isNoStreamExam(selectedExam)) {
-            setView('subject')
-            setSelectedSubject(null)
-            return
-          }
-          // CUET UG → back to subject
-          setView('subject')
-          setSelectedSubject(null)
-        }}
-        className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-colors shadow-sm"
-      >
-        <ChevronLeft size={18} className="text-slate-600 dark:text-slate-300" />
-      </button>
-      <div>
-        <Breadcrumb items={breadcrumbs} onNavigate={handleBreadcrumb} />
-        <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
-          Previous Year Papers
-        </h2>
-      </div>
-    </div>
+        {view === "quizzes" && selectedSubject && (
+          <>
+            <div className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => {
+                  // FSL_PSC → back to stream (org list)
+                  if (DIRECT_QUIZ_EXAMS.includes(selectedExam)) {
+                    setView("stream");
+                    setSelectedSubject(null);
+                    return;
+                  }
+                  // UGC NET → back to subject
+                  if (isNoStreamExam(selectedExam)) {
+                    setView("subject");
+                    setSelectedSubject(null);
+                    return;
+                  }
+                  // CUET UG → back to subject
+                  setView("subject");
+                  setSelectedSubject(null);
+                }}
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-colors shadow-sm"
+              >
+                <ChevronLeft
+                  size={18}
+                  className="text-slate-600 dark:text-slate-300"
+                />
+              </button>
+              <div>
+                <Breadcrumb items={breadcrumbs} onNavigate={handleBreadcrumb} />
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
+                  Previous Year Papers
+                </h2>
+              </div>
+            </div>
 
             {quizLoading ? (
               <div className="flex items-center justify-center py-20">
