@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -10,7 +10,9 @@ import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import GoogleAuthSuccessPage from "@/pages/GoogleAuthSuccessPage";
 import DashboardPage from "@/pages/DashboardPage";
-import QuizPage from "@/pages/QuizPage";
+import QuizEntryPage from "@/pages/QuizEntryPage";
+import MockInstructionsPage from "@/pages/MockInstructionsPage";
+import MockExamPage from "@/pages/MockExamPage";
 import ResultsPage from "@/pages/ResultsPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import AdminPage from "@/pages/AdminPage";
@@ -51,7 +53,9 @@ const App = () => (
           {/* Protected */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/quiz/:quizId" element={<QuizPage />} />
+            <Route path="/quiz/:quizId" element={<QuizEntryPage />} />
+            <Route path="/mock/:quizId" element={<MockInstructionsPage />} />
+            <Route path="/mock/attempt/:attemptId" element={<MockExamPage />} />
             <Route path="/results/:attemptId" element={<ResultsPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />

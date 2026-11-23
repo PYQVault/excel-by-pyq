@@ -369,26 +369,27 @@ const ResultsPage = () => {
   const [filter, setFilter] = useState("all"); // all | correct | wrong | unattempted
   const [animating, setAnimating] = useState(true);
 
-  const normalizeResults = (data) => {
-  return {
-    quizId: data.quizId,
-    attemptId: data.attemptId,
-    totalMarks: data.totalMarks ?? data.score ?? 0,
-    maxMarks: data.maxMarks ?? data.totalQuestions * 5 ?? 0,
-    correctCount: data.correctCount ?? data.score ?? 0,
-    wrongCount: data.wrongCount ?? 0,
-    graceCount: data.graceCount ?? 0,
-    unattemptedCount: data.unattemptedCount ?? 0,
-    scorePercentage: data.scorePercentage ?? 0,
-    timeTaken: data.timeTaken ?? 0,
-    markingScheme: data.markingScheme ?? {
-      correct: 5,
-      wrong: -1,
-      unattempted: 0,
-    },
-    results: data.results ?? [],
+    const normalizeResults = (data) => {
+    return {
+      quizId: data.quizId,
+      attemptId: data.attemptId,
+      mode: data.mode ?? "practice",
+      totalMarks: data.totalMarks ?? data.score ?? 0,
+      maxMarks: data.maxMarks ?? data.totalQuestions * 5 ?? 0,
+      correctCount: data.correctCount ?? data.score ?? 0,
+      wrongCount: data.wrongCount ?? 0,
+      graceCount: data.graceCount ?? 0,
+      unattemptedCount: data.unattemptedCount ?? 0,
+      scorePercentage: data.scorePercentage ?? 0,
+      timeTaken: data.timeTaken ?? 0,
+      markingScheme: data.markingScheme ?? {
+        correct: 5,
+        wrong: -1,
+        unattempted: 0,
+      },
+      results: data.results ?? [],
+    };
   };
-};
 
   // ── Load results ────────────────────────────────────────────────────
   useEffect(() => {
@@ -420,21 +421,26 @@ const ResultsPage = () => {
   }, []);
 
   // Add this handler in ResultsPage:
-  const handleRetry = async () => {
-  try {
-    await api.post(`/attempts/${attemptId}/abandon`).catch(() => {})
-    // ── Pass fresh:true so QuizPage skips resume popup ───────────────
-    navigate(`/quiz/${results?.quizId}`, {
-      replace: true,
-      state:   { fresh: true },
-    })
-  } catch {
-    navigate(`/quiz/${results?.quizId}`, {
-      replace: true,
-      state:   { fresh: true },
-    })
-  }
-}
+   const handleRetry = async () => {
+    // Mock exam → back to the instructions page (a new timed attempt)
+    if (results?.mode === "mock") {
+      navigate(`/mock/${results.quizId}`, { replace: true });
+      return;
+    }
+
+    try {
+      await api.post(`/attempts/${attemptId}/abandon`).catch(() => {});
+      navigate(`/quiz/${results?.quizId}`, {
+        replace: true,
+        state: { fresh: true },
+      });
+    } catch {
+      navigate(`/quiz/${results?.quizId}`, {
+        replace: true,
+        state: { fresh: true },
+      });
+    }
+  };
 
   if (loading) return <Loader text="Loading your results..." />;
   if (!results) return null;

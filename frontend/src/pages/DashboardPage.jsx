@@ -408,17 +408,18 @@ const DashboardPage = () => {
 
   // ── Stats ────────────────────────────────────────────────────────────
   const allAttempts = Object.values(attempts);
-  const stats = {
+    const stats = {
     completed: allAttempts.filter((a) => a.status === "completed").length,
     inProgress: allAttempts.filter((a) => a.status === "in_progress").length,
     avgScore: (() => {
       const done = allAttempts.filter((a) => a.status === "completed");
       if (!done.length) return "—";
-      const avg =
-        done.reduce(
-          (s, a) => s + Math.round((a.score / a.totalQuestions) * 100),
-          0,
-        ) / done.length;
+      const percents = done.map((a) => {
+        const correct = a.quizId?.markingScheme?.correct ?? 5;
+        const max = (a.totalQuestions ?? 0) * correct;
+        return max > 0 ? Math.max(0, (a.score / max) * 100) : 0;
+      });
+      const avg = percents.reduce((s, p) => s + p, 0) / percents.length;
       return `${Math.round(avg)}%`;
     })(),
     totalExams: Object.keys(meta).length,
@@ -518,7 +519,7 @@ const DashboardPage = () => {
   };
 
   // ── Action handler ───────────────────────────────────────────────────
-  const handleAction = async (quizId, action, attemptId) => {
+    const handleAction = async (quizId, action, attemptId) => {
     if (action === "results") {
       navigate(`/results/${attemptId}`);
       return;
@@ -546,6 +547,13 @@ const DashboardPage = () => {
       return;
     }
 
+    if (action === "continue") {
+      // Unfinished PRACTICE attempt → straight back in, no mode selector
+      navigate(`/quiz/${quizId}`, { state: { mode: "practice" } });
+      return;
+    }
+
+    // "start" → QuizEntryPage decides (selector for UGC NET, practice for others)
     navigate(`/quiz/${quizId}`);
   };
 
@@ -898,18 +906,27 @@ const DashboardPage = () => {
                       <span className="text-xs text-slate-400">
                         {papers.length} paper{papers.length !== 1 ? "s" : ""}
                       </span>
-                      <div className="flex gap-1 flex-wrap">
-                        {[...new Set(papers.map((p) => p.year))]
-                          .slice(0, 3)
-                          .map((year) => (
-                            <span
-                              key={year}
-                              className={`text-xs px-1.5 py-0.5 rounded font-semibold ${cfg.badge}`}
-                            >
-                              {year}
-                            </span>
-                          ))}
-                      </div>
+                      
+<div className="flex gap-1 flex-wrap">
+  {(() => {
+    const years = [...new Set(papers.map((p) => p.year))];
+    return (
+      <>
+        {years.slice(0, 2).map((year) => (
+          <span key={year} className={`text-xs px-1.5 py-0.5 rounded font-semibold ${cfg.badge}`}>
+            {year}
+          </span>
+        ))}
+        {years.length > 2 && (
+          <span className="text-xs px-1.5 py-0.5 rounded font-semibold bg-slate-700/70 text-slate-300">
+            + many more
+          </span>
+        )}
+      </>
+    );
+  })()}
+</div>
+
                     </div>
                   </button>
                 );

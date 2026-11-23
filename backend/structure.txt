@@ -215,4 +215,16 @@ node scripts/importQuiz.js --file="CGPSC_Sr._Scientific_Officer_Zoology_2016.xls
 
 node scripts/importQuiz.js --file="COMMERCE_2022_OCT_2.xlsx" --exam="UGC_NET" --subject="Commerce" --year=2022 --variant="Oct_2" --markingCorrect=2 --markingWrong=0 --title="UGC NET 2022 Oct_2 - Commerce"
 
-node scripts/importQuiz.js --file="COMMERCE_2026_JAN.xlsx" --exam="UGC_NET" --subject="Commerce" --year=2026 --variant="Jan" --markingCorrect=2 --markingWrong=0 --title="UGC NET 2026 Jan - Commerce"
+node scripts/importQuiz.js --file="CRIMINOLOGY_2018_DEC.xlsx" --exam="UGC_NET" --subject="Criminology" --year=2018 --variant="Dec" --markingCorrect=2 --markingWrong=0 --title="UGC NET 2018 Dec - Criminology"
+
+node scripts/importQuiz.js --file="CRIMINOLOGY_2022_DECEMBER.xlsx" --exam="UGC_NET" --subject="Criminology" --year=2022 --variant="Dec" --markingCorrect=2 --markingWrong=0 --title="UGC NET 2022 Dec - Criminology"
+
+node scripts/importQuiz.js --file="JKPSC_Scientific_Officer_Biology_2022.xlsx" --exam="FSL_PSC" --stream="Jammu and Kashmir PSC" --year=2022 --title="2022 - JKPSC - Scientific Officer - Biology" --markingCorrect=1 --markingWrong=0
+
+node scripts/importQuiz.js --file="HSSC_Sr._Scientific_Assistant_2022.xlsx" --exam="FSL_PSC" --stream="Haryana Staff Selection Commission" --year=2022 --title="2022 - HSSC - Sr. Scientific Assistant" --markingCorrect=1 --markingWrong=0
+
+node scripts/importQuiz.js --file="HSSC_Sr._Scientific_Assistant_2023_2.xlsx" --exam="FSL_PSC" --stream="Haryana Staff Selection Commission" --year=2023 --title="2023 - HSSC - Sr. Scientific Assistant - Set 2" --markingCorrect=1 --markingWrong=0
+
+node scripts/importQuiz.js --file="TNPSC_Jr._Scientific_Officer_2026_Paper_2.xlsx" --exam="FSL_PSC" --stream="Tamil Nadu PSC" --year=2026 --title="2026 - TNPSC - Jr. Scientific Officer - Paper 2 - Phy, Chem, Bio, Comp. Sci and FS" --markingCorrect=1 --markingWrong=0
+
+node scripts/setDuration.js --exam=UGC_NET --subject="Commerce" --minutes=180 --dryRun

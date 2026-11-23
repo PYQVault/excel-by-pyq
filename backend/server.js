@@ -14,6 +14,7 @@ const cors     = require('cors')
 const passport = require('./config/passport')
 const { notFound, errorHandler } = require('./middleware/errorMiddleware')
 const keepAlive = require('./utils/keepAlive')
+const { startMockSweeper } = require('./utils/mockExamService')
 
 const app = express()
 
@@ -44,6 +45,7 @@ app.use('/api/quizzes',  require('./routes/quizRoutes'))
 app.use('/api/attempts', require('./routes/attemptRoutes'))
 app.use('/api/admin',    require('./routes/adminRoutes'))
 app.use('/api/feedback', require('./routes/feedbackRoutes'))
+app.use('/api/mock', require('./routes/mockExamRoutes'))
 
 app.use(notFound)
 app.use(errorHandler)
@@ -52,4 +54,5 @@ const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {
   console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
   keepAlive()
+  startMockSweeper()
 })

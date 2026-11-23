@@ -100,6 +100,8 @@ const markingScheme = {
   unattempted: 0,
 }
 
+const timeLimitMinutes = args.duration ? parseInt(args.duration, 10) : 0
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 function isImageUrl(str) {
   if (!str) return false
@@ -330,7 +332,7 @@ async function importQuiz() {
     description:   args.title,
     markingScheme,
     questions:     inserted.map((q) => q._id),
-    timeLimitMinutes: 0,
+    timeLimitMinutes,
     isPublished:   true,
   })
 
